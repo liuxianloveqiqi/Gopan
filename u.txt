@@ -1,0 +1,4 @@
+goctl model mysql ddl -src user.sql -dir . -c
+goctl api go -api user.api -dir .
+goctl rpc protoc user.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+go run user.go -f etc/user.yaml

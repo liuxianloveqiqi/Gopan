@@ -1,0 +1,111 @@
+syntax = "v1"  // 版本号
+
+// 接口信息
+info(
+    title: "Gopan/user.api"
+    author: "liuxian"
+    version: "1.0.0"
+)
+type (
+    // 手机号注册/登陆
+    RegisterReq {
+        UserPhone string `json:"userPhone"`
+        VeCode    string `json:"veCode"`
+    }
+    RegisterByPhoneRep {
+        UserPhone string `json:"userPhone"`
+    }
+    LoginReq {
+        PhoneOrEmail string `json:"phoneOrEmail"` // 手机号或者邮箱
+        PassWord     string `json:"PassWord"`     // 用户密码，MD5加密
+    }
+
+    userInfoReq {
+        UserId int64 `json:"userId"` // 用户id
+    }
+
+    UserInfoResply {
+        Code    int64         `json:"Code"`
+        Message string        `json:"Message"`
+        Data    *UserInfoItem `json:"Data"`
+    }
+    RegisterByPhoneResply {
+        Code    int64  `json:"Code"`
+        Message string `json:"Message"`
+        VeCode  string `json:"veCode"`
+    }
+    UserInfoItem {
+        Id           int64  `json:"userId"`     // 用户ID
+        PassWord     string `json:"passWord"`   // 用户密码，MD5加密
+        UserNick     string `json:"userNick"`   // 用户昵称
+        UserFace     string `json:"userFace"`   // 用户头像地址
+        UserSex      int64  `json:"userSex"`    // 用户性别：0男，1女，2保密
+        UserEmail    string `json:"userEmail"`  // 用户邮箱
+        UserPhone    string `json:"userPhone"`  // 手机号
+        GithubId     string `json:"githubId"`   // github_id
+        QqId         string `json:"qqId"`       // qq_id
+        LoginAddress string `json:"loginAddr"`  // 用户登录IP地址
+        CreateTime   string `json:"createTime"` // 创建时间
+        UpdateTime   string `json:"updateTime"` // 更新时间
+    }
+    CommonResply {
+        Code    int64  `json:"Code"`
+        Message string `json:"Message"`
+        Data    string `json:"Data"`
+    }
+    TokenResply {
+        Code         int64  `json:"Code"`
+        Message      string `json:"Message"`
+        UserId       int64  `json:"userId"`
+        AccessToken  string `json:"accessToken"`
+        RefreshToken string `json:"refreshToken"`
+    }
+)
+
+@server(
+    prefix: account
+)
+
+service user-api {
+    @doc(
+        summary: "发验证码"
+    )
+    @handler Sendcode
+    post /sendcode (RegisterByPhoneRep) returns (RegisterByPhoneResply)
+
+    @doc(
+        summary: "用户验证码形式注册/登陆"
+    )
+    @handler Register
+    post /register (RegisterReq) returns (TokenResply)
+
+
+    @doc(
+        summary: "用户密码形式登录"
+    )
+    @handler Login
+    post /login (LoginReq) returns (TokenResply)
+
+    @doc(
+        summary: "github第三方登陆"
+    )
+    @handler GithubLogin
+    get /github/login () returns ()
+    @doc(
+        summary: "github第三方回调"
+    )
+    @handler GithubCallback
+    get /github/callback () returns (TokenResply)
+}
+
+@server(
+    middleware: JWT // 路由中间件声明
+)
+
+service user-api {
+    @doc(
+        summary: "用户信息"
+    )
+    @handler userInfo
+    post /userinfo (userInfoReq) returns (UserInfoResply)
+}
