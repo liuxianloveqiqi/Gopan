@@ -1,0 +1,25 @@
+Name: user-api
+Host: 0.0.0.0
+Port: 3001
+# Rpc
+Rpc:
+  Etcd:
+    Hosts:
+      - 127.0.0.1:2379
+    Key: user.rpc
+# mysql-master配置
+MysqlMaster:
+  DataSource: root:123456@(127.0.0.1:3306)/gopan?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai
+# mysql-slave配置
+MysqlSlave:
+  DataSource: root:123456@(127.0.0.1:3307)/gopan?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai
+# redis 配置
+CacheRedis:
+  - Host: 127.0.0.1:6379
+    Pass:
+    Type: node
+# 第三方github
+Github:
+  ClientID: 9370b1e9cf68ef7709f4
+  RedirectUrl: http://localhost:3001/account/github/callback
+  ClientSecret: e496e484ee2e3c24f6c1e5a5d6c7f93a0b0ac64f

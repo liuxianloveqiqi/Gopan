@@ -1,4 +1,4 @@
-package init
+package init_db
 
 import (
 	"github.com/zeromicro/go-queue/kq"

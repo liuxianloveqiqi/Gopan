@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func SMS(phone, secretId, secretKey string, ctx context.Context, rdb *redis.Client) string {
+func SMS(phone, secretId, secretKey string, ctx context.Context, rdb *redis.ClusterClient) string {
 	// 实例化一个认证对象，入参需要传入腾讯云账户密钥对secretId,secretKey.
 	credential := common.NewCredential(
 		secretId,

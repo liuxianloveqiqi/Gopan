@@ -1,0 +1,83 @@
+# 描述 Compose 文件的版本信息
+version: "3.8"
+
+# 定义服务，可以多个
+services:
+
+  redis-6379: # 服务名称
+    image: redis:latest # 创建容器时所需的镜像
+    container_name: redis-6379 # 容器名称
+    restart: "no" # 容器总是重新启动
+    ports:
+      - "6379:6379"
+      - "16379:16379"
+    volumes: # 数据卷，目录挂载
+      - ./etc_rc.local:/etc/rc.local
+      - ./data/redis/6379/conf/redis.conf:/etc/redis/redis.conf
+      - ./data/redis/6379/data:/data
+    command: redis-server /etc/redis/redis.conf # 覆盖容器启动后默认执行的命令
+
+  redis-6380:
+    image: redis:latest
+    container_name: redis-6380
+    ports:
+      - "6380:6379"
+      - "16380:16379"
+    volumes:
+      - ./etc_rc.local:/etc/rc.local
+      - ./data/redis/6380/conf/redis.conf:/etc/redis/redis.conf
+      - ./data/redis/6380/data:/data
+    command: redis-server /etc/redis/redis.conf
+
+  redis-6381:
+    image: redis:latest
+    container_name: redis-6381
+    ports:
+      - "6381:6379"
+      - "16381:16379"
+    volumes:
+      - ./etc_rc.local:/etc/rc.local
+      - ./data/redis/6381/conf/redis.conf:/etc/redis/redis.conf
+      - ./data/redis/6381/data:/data
+    command: redis-server /etc/redis/redis.conf
+
+  redis-6382:
+    image: redis:latest
+    container_name: redis-6382
+    ports:
+      - "6382:6379"
+      - "16382:16379"
+    volumes:
+      - ./etc_rc.local:/etc/rc.local
+      - ./data/redis/6382/conf/redis.conf:/etc/redis/redis.conf
+      - ./data/redis/6382/data:/data
+    command: redis-server /etc/redis/redis.conf
+
+  redis-6383:
+    image: redis:latest
+    container_name: redis-6383
+    ports:
+      - "6383:6379"
+      - "16383:16379"
+    volumes:
+      - ./etc_rc.local:/etc/rc.local
+      - ./data/redis/6383/conf/redis.conf:/etc/redis/redis.conf
+      - ./data/redis/6383/data:/data
+    command: redis-server /etc/redis/redis.conf
+
+  redis-6384:
+    image: redis:latest
+    container_name: redis-6384
+    ports:
+      - "6384:6379"
+      - "16384:16379"
+    volumes:
+      - ./etc_rc.local:/etc/rc.local
+      - ./data/redis/6384/conf/redis.conf:/etc/redis/redis.conf
+      - ./data/redis/6384/data:/data
+    command: redis-server /etc/redis/redis.conf
+
+# 使用已经存在的bridge网络，或者也可以手动创建一个 替换上面的172.17.0.1
+# 创建方式：docker network create redis --subnet 172.28.0.0/16
+# 当然也有另一种方式，就是用docker-compose自动创建的网络，不过需要手动进入一个容器运行 cluster 创建命令
+

@@ -35,15 +35,6 @@ services:
       - ./data/slave:/var/lib/mysql
     command: --server-id=2 --log-bin --binlog-do-db=gopan --relay-log --relay-log-index=slave-relay-bin.index --relay-log-info-repository=TABLE
 
-
-
-  redis:
-    image: redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./data/redis-data:/data
-    command: redis-server --appendonly yes
   etcd:
     image: quay.io/coreos/etcd:latest
     command: etcd --listen-client-urls=http://0.0.0.0:2379 --advertise-client-urls=http://0.0.0.0:2379

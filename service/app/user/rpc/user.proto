@@ -1,3 +1,67 @@
 syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+package user;
 
-package template;
+option go_package = "./user";
+
+// 发验证码
+message SendCodeReq{
+  string UserPhone = 1;
+}
+message SendCodeResp{
+  string VeCode = 1;
+}
+
+// 手机号登陆或者注册
+message RegisterReq{
+  string UserPhone = 1;
+  string VeCode = 2;
+}
+
+// 密码登陆
+message LoginReq{
+  string PhoneOrEmail = 1;
+  string PassWord = 2;
+}
+
+message CommonResp{
+  int64 UserId = 1;
+}
+
+// 查询用户信息
+message UserInfoReq{
+  int64 UserId= 1;
+}
+message UserInfo {
+  int64 user_id = 1;
+  string passWord = 2;
+  string user_Nick = 3;
+  string user_Face = 4;
+  int32 User_Sex = 5;
+  string user_Email = 6;
+  string user_Phone = 7;
+  google.protobuf.Timestamp create_time = 8;
+  google.protobuf.Timestamp update_time = 9;
+  google.protobuf.Timestamp delete_time = 10;
+}
+
+message UserList {
+  repeated UserInfo users = 1;
+}
+
+message SearchResp{
+  repeated Result results = 1;
+}
+
+message Result {
+  string url = 1;
+  string title = 2;
+  repeated string snippets = 3;
+}
+
+service user{
+  rpc SendCode(SendCodeReq) returns (SendCodeResp); // 发验证码
+  rpc Register(RegisterReq) returns(CommonResp);   //注册或者登陆
+  rpc Login(LoginReq) returns(CommonResp);        // 密码登陆
+  rpc UserInfo(UserInfoReq) returns (UserList); // 查用户信息
+}

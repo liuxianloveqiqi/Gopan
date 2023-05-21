@@ -10,8 +10,8 @@ services:
     image: traefik:v2.4
     command:
       - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.api.address=:9000"
+      - "--entrypoints.http.address=:80"
       - "--api=true"  # 启用Traefik的API
       - "--api.insecure=true"# 启用Traefik的Web UI
       - "--providers.docker"
@@ -32,7 +32,7 @@ services:
     expose:
       - "9000"
     volumes:
-      - ./data/data1:/data
+      - ./data/minio/data1:/data
     networks:
       - traefik-network
     labels:
@@ -53,7 +53,7 @@ services:
     expose:
       - "9000"
     volumes:
-      - ./data/data2:/data
+      - ./data/minio/data2:/data
     networks:
       - traefik-network
     labels:
@@ -73,7 +73,7 @@ services:
     expose:
       - "9000"
     volumes:
-      - ./data/data3:/data
+      - ./data/minio/data3:/data
     networks:
       - traefik-network
     labels:
@@ -94,7 +94,7 @@ services:
     expose:
       - "9000"
     volumes:
-      - ./data/data4:/data
+      - ./data/minio/data4:/data
     networks:
       - traefik-network
     labels:
@@ -105,5 +105,6 @@ services:
       - "traefik.http.services.minio4.loadbalancer.server.port=9000"
       - "traefik.http.services.minio4.loadbalancer.server.scheme=http"
       - "traefik.http.services.minio4.loadbalancer.passhostheader=true"
+
 
 

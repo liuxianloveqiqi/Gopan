@@ -1,4 +1,4 @@
-package init
+package init_db
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
+	"time"
 )
 
 // gorm初始化
@@ -34,14 +35,27 @@ func InitGorm(MysqlDataSourece string) *gorm.DB {
 }
 
 // redis初始化
-func InitRedis(add, password string, db int) *redis.Client {
+func InitRedis() *redis.ClusterClient {
+	// Redis集群连接参数
+	clusterOptions := &redis.ClusterOptions{
+		Addrs: []string{
+			"localhost:6379",
+			"localhost:6380",
+			"localhost:6381",
+			"localhost:6382",
+			"localhost:6383",
+			"localhost:6384",
+		},
+	}
 
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     add,
-		Password: password,
-		DB:       db,
-	})
-	_, err := rdb.Ping(context.Background()).Result()
+	// 创建Redis集群客户端
+	rdb := redis.NewClusterClient(clusterOptions)
+
+	// 连接Redis集群
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
 		panic("连接redis失败, error=" + err.Error())
 	}
