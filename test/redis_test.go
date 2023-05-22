@@ -47,8 +47,9 @@ func TestRdis(t *testing.T) {
 	// 打印集群信息
 	fmt.Println(info)
 	fmt.Println("-------------------")
+	client.Set(ctx, "19870427401", 5369, 0)
 
-	fmt.Println(client.Get(ctx, "wf").Result())
+	fmt.Println(client.Get(ctx, "19870427401").Result())
 	// 打印集群信息
 
 }

@@ -1,6 +1,9 @@
 package logic
 
 import (
+	"Gopan/service/app/user/model"
+	"Gopan/service/common/errorx"
+	"Gopan/service/common/utils"
 	"context"
 
 	"Gopan/service/app/user/rpc/internal/svc"
@@ -25,6 +28,18 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 
 func (l *LoginLogic) Login(in *user.LoginReq) (*user.CommonResp, error) {
 	// todo: add your logic here and delete this line
-
-	return &user.CommonResp{}, nil
+	user0 := model.User{}
+	r := l.svcCtx.SlaveDb.Where("user_phone = ? or user_email = ?", in.PhoneOrEmail, in.PhoneOrEmail).First(&user0)
+	if r.RowsAffected == 0 {
+		return nil, errorx.NewCodeError(10005, errorx.ERRPhoneOrEmail)
+	}
+	if r.Error != nil {
+		return nil, errorx.NewDefaultError(r.Error.Error())
+	}
+	if user0.PassWord != utils.Md5Password(in.PassWord, "liuxian") {
+		return nil, errorx.NewCodeError(10006, errorx.ERRLoginPassword)
+	}
+	return &user.CommonResp{
+		UserId: user0.UserId,
+	}, nil
 }

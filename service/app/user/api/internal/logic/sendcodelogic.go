@@ -31,7 +31,7 @@ func (l *SendcodeLogic) Sendcode(req *types.RegisterByPhoneRep) (resp *types.Reg
 	// todo: add your logic here and delete this line
 	err = utils.DefaultGetValidParams(l.ctx, req)
 	if err != nil {
-		return nil, errorx.NewCodeError(100001, fmt.Sprintf("sendcode validate校验错误: %v", err))
+		return nil, errorx.NewCodeError(100001, fmt.Sprintf("validate校验错误: %v", err))
 	}
 
 	cnt, err := l.svcCtx.Rpc.SendCode(l.ctx, &user.SendCodeReq{UserPhone: req.UserPhone})

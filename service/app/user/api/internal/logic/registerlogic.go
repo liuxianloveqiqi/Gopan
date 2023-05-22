@@ -1,7 +1,11 @@
 package logic
 
 import (
+	"Gopan/service/app/user/rpc/types/user"
+	"Gopan/service/common/errorx"
+	"Gopan/service/common/utils"
 	"context"
+	"github.com/google/uuid"
 
 	"Gopan/service/app/user/api/internal/svc"
 	"Gopan/service/app/user/api/internal/types"
@@ -25,6 +29,21 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 
 func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.TokenResp, err error) {
 	// todo: add your logic here and delete this line
+	cnt, err := l.svcCtx.Rpc.Register(l.ctx, &user.RegisterReq{
+		UserPhone: req.UserPhone,
+		VeCode:    req.VeCode,
+	})
+	if err != nil {
+		return nil, err
+	}
+	accessTokenString, refreshTokenString := utils.GetToken(cnt.UserId, uuid.New().String())
+	if accessTokenString == "" || refreshTokenString == "" {
+		return nil, errorx.NewCodeError(100002, errorx.JWt)
+	}
 
-	return
+	return &types.TokenResp{
+		UserId:       cnt.UserId,
+		AccessToken:  accessTokenString,
+		RefreshToken: refreshTokenString,
+	}, nil
 }
