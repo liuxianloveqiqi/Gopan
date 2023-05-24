@@ -38,8 +38,7 @@ func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.TokenResp, err erro
 		PassWord:     req.PassWord,
 	})
 	if err != nil {
-		fmt.Println("---------------")
-		fmt.Println(err)
+
 		return nil, errorx.NewCodeError(utils.ApiError(err))
 	}
 	accessTokenString, refreshTokenString := utils.GetToken(cnt.UserId, uuid.New().String())

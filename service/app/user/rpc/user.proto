@@ -43,7 +43,7 @@ message UserInfo {
   google.protobuf.Timestamp create_time = 8;
   google.protobuf.Timestamp update_time = 9;
   google.protobuf.Timestamp delete_time = 10;
-  string
+
 }
 
 message UserList {

@@ -1,8 +1,11 @@
 package logic
 
 import (
+	"Gopan/service/app/user/model"
+	"Gopan/service/common/errorx"
 	"context"
 	"errors"
+	"fmt"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"Gopan/service/app/user/rpc/internal/svc"
@@ -28,9 +31,13 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfo
 func (l *UserInfoLogic) UserInfo(in *user.UserInfoReq) (*user.UserList, error) {
 	// todo: add your logic here and delete this line
 
-	user0, err := l.svcCtx.UserModel.FindOne(l.ctx, in.UserId)
-	if err != nil {
-		return nil, errors.New("10001:" + err.Error())
+	user0 := model.User{}
+	r := l.svcCtx.SlaveDb.Where("user_id = ?", in.UserId).First(&user0)
+	if r.RowsAffected == 0 {
+		return nil, errors.New("20001:" + errorx.ErrMysqlDateNoResult)
+	}
+	if r.Error != nil {
+		return nil, errors.New("10001:" + r.Error.Error())
 	}
 	users := make([]*user.User, 0)
 	user1 := &user.User{
@@ -46,6 +53,7 @@ func (l *UserInfoLogic) UserInfo(in *user.UserInfoReq) (*user.UserList, error) {
 		DeleteTime: timestamppb.New(user0.DeleteTime),
 	}
 	users = append(users, user1)
+	fmt.Println("这里是users:   ", users)
 	return &user.UserList{
 		Users: users,
 	}, nil

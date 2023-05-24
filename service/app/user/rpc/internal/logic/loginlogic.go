@@ -38,7 +38,7 @@ func (l *LoginLogic) Login(in *user.LoginReq) (*user.CommonResp, error) {
 		return nil, errorx.NewDefaultError(r.Error.Error())
 	}
 
-	if utils.ValidMd5Password(in.PassWord, "liuxian", user0.PassWord) {
+	if !utils.ValidMd5Password(in.PassWord, "liuxian", user0.PassWord) {
 		return nil, errors.New("10006:" + errorx.ERRLoginPassword)
 	}
 	return &user.CommonResp{

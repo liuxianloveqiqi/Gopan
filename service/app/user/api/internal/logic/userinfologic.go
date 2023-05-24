@@ -5,6 +5,7 @@ import (
 	"Gopan/service/common/errorx"
 	"Gopan/service/common/utils"
 	"context"
+	"fmt"
 
 	"Gopan/service/app/user/api/internal/svc"
 	"Gopan/service/app/user/api/internal/types"
@@ -47,5 +48,6 @@ func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRe
 		UpdateTime: cnt.Users[0].UpdateTime.AsTime().Format("2006-01-02 15:04:05"),
 		DeleteTime: cnt.Users[0].DeleteTime.AsTime().Format("2006-01-02 15:04:05"),
 	}
+	fmt.Println("这里是usrinfo:", ret)
 	return &types.UserInfoResp{UserInfo: &ret}, nil
 }

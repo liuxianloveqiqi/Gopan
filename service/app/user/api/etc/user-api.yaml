@@ -23,3 +23,4 @@ Github:
   ClientID: 9370b1e9cf68ef7709f4
   RedirectUrl: http://localhost:3001/account/github/callback
   ClientSecret: e496e484ee2e3c24f6c1e5a5d6c7f93a0b0ac64f
+

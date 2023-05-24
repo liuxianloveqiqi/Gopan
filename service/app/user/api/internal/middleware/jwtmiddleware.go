@@ -1,10 +1,10 @@
 package middleware
 
 import (
+	"Gopan/service/common/errorx"
 	"Gopan/service/common/utils"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -26,28 +26,23 @@ func (m *JWTMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			err, _ := json.Marshal(errors.New("请求头中auth为空"))
+			err, _ := json.Marshal(errorx.NewCodeError(30001, errorx.ErrHeadNil))
 			w.Write(err)
-			fmt.Println("一错")
 			return
 		}
 		fmt.Println(22222)
 		parts := strings.Split(authHeader, " ")
 		if !(len(parts) == 3 && parts[0] == "Bearer") {
 			w.WriteHeader(http.StatusBadRequest)
-			err, _ := json.Marshal(errors.New("请求头中auth格式有误"))
+			err, _ := json.Marshal(errorx.NewCodeError(30002, errorx.ErrHeadFormat))
 			w.Write(err)
-			fmt.Println("二错")
-
 			return
 		}
-		fmt.Println(333333)
 		parseToken, isExpire, err := utils.ParseToken(parts[1], parts[2])
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
-			err, _ := json.Marshal(errors.New("token验证错误"))
+			err, _ := json.Marshal(errorx.NewCodeError(30003, errorx.ErrTokenProve))
 			w.Write(err)
-			fmt.Println("三错")
 			return
 		}
 		if isExpire {
@@ -55,8 +50,6 @@ func (m *JWTMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 			w.Header().Set("Authorization", fmt.Sprintf("Bearer %s %s", parts[1], parts[2]))
 		}
 		r = r.WithContext(context.WithValue(r.Context(), "user_id", parseToken.ID))
-		fmt.Println(parseToken.ID, "gggggg")
-		// Passthrough to next handler if need
 		next(w, r)
 	}
 }
