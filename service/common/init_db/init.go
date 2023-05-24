@@ -39,12 +39,12 @@ func InitRedis() *redis.ClusterClient {
 	// Redis集群连接参数
 	clusterOptions := &redis.ClusterOptions{
 		Addrs: []string{
-			"localhost:6379",
-			"localhost:6380",
-			"localhost:6381",
-			"localhost:6382",
-			"localhost:6383",
-			"localhost:6384",
+			"43.139.195.17:6379",
+			"43.139.195.17:6380",
+			"43.139.195.17:6381",
+			"43.139.195.17:6382",
+			"43.139.195.17:6383",
+			"43.139.195.17:6384",
 		},
 	}
 

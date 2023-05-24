@@ -36,7 +36,7 @@ func (l *SendcodeLogic) Sendcode(req *types.RegisterByPhoneRep) (resp *types.Reg
 
 	cnt, err := l.svcCtx.Rpc.SendCode(l.ctx, &user.SendCodeReq{UserPhone: req.UserPhone})
 	if err != nil {
-		return nil, err
+		return nil, errorx.NewCodeError(utils.ApiError(err))
 	}
 
 	return &types.RegisterByPhoneResp{VeCode: cnt.VeCode}, nil

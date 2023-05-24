@@ -5,6 +5,7 @@ import (
 	"Gopan/service/common/errorx"
 	"Gopan/service/common/utils"
 	"context"
+	"fmt"
 	"github.com/google/uuid"
 
 	"Gopan/service/app/user/api/internal/svc"
@@ -29,12 +30,16 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 
 func (l *RegisterLogic) Register(req *types.RegisterReq) (resp *types.TokenResp, err error) {
 	// todo: add your logic here and delete this line
+	err = utils.DefaultGetValidParams(l.ctx, req)
+	if err != nil {
+		return nil, errorx.NewCodeError(100001, fmt.Sprintf("validate校验错误: %v", err))
+	}
 	cnt, err := l.svcCtx.Rpc.Register(l.ctx, &user.RegisterReq{
 		UserPhone: req.UserPhone,
 		VeCode:    req.VeCode,
 	})
 	if err != nil {
-		return nil, err
+		return nil, errorx.NewCodeError(utils.ApiError(err))
 	}
 	accessTokenString, refreshTokenString := utils.GetToken(cnt.UserId, uuid.New().String())
 	if accessTokenString == "" || refreshTokenString == "" {

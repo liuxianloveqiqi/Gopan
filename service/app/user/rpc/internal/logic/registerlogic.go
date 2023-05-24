@@ -5,6 +5,7 @@ import (
 	"Gopan/service/common/errorx"
 	"Gopan/service/common/utils"
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -32,10 +33,10 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.CommonResp, error)
 	// todo: add your logic here and delete this line
 	vc, err := l.svcCtx.Rdb.Get(l.ctx, in.UserPhone).Result()
 	if err != nil {
-		return nil, errorx.NewCodeError(10003, "redis get错误")
+		return nil, errors.New("10003:" + errorx.ERRNoPhone)
 	}
 	if in.VeCode != vc {
-		return nil, errorx.NewCodeError(10004, "验证码错误")
+		return nil, errors.New("10004:" + errorx.ERRValidateCode)
 	}
 	users, err := l.svcCtx.UserModel.FindUserBy(l.svcCtx.SlaveDb, "user_phone", in.UserPhone)
 	if err != nil {

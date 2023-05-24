@@ -5,6 +5,7 @@ import (
 	"Gopan/service/common/errorx"
 	"Gopan/service/common/utils"
 	"context"
+	"errors"
 
 	"Gopan/service/app/user/rpc/internal/svc"
 	"Gopan/service/app/user/rpc/types/user"
@@ -31,13 +32,14 @@ func (l *LoginLogic) Login(in *user.LoginReq) (*user.CommonResp, error) {
 	user0 := model.User{}
 	r := l.svcCtx.SlaveDb.Where("user_phone = ? or user_email = ?", in.PhoneOrEmail, in.PhoneOrEmail).First(&user0)
 	if r.RowsAffected == 0 {
-		return nil, errorx.NewCodeError(10005, errorx.ERRPhoneOrEmail)
+		return nil, errors.New("10005:" + errorx.ERRPhoneOrEmail)
 	}
 	if r.Error != nil {
 		return nil, errorx.NewDefaultError(r.Error.Error())
 	}
-	if user0.PassWord != utils.Md5Password(in.PassWord, "liuxian") {
-		return nil, errorx.NewCodeError(10006, errorx.ERRLoginPassword)
+
+	if utils.ValidMd5Password(in.PassWord, "liuxian", user0.PassWord) {
+		return nil, errors.New("10006:" + errorx.ERRLoginPassword)
 	}
 	return &user.CommonResp{
 		UserId: user0.UserId,

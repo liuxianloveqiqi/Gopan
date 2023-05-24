@@ -332,7 +332,7 @@ type User struct {
 	PassWord   string                 `protobuf:"bytes,2,opt,name=passWord,proto3" json:"passWord,omitempty"`
 	User_Nick  string                 `protobuf:"bytes,3,opt,name=user_Nick,json=userNick,proto3" json:"user_Nick,omitempty"`
 	User_Face  string                 `protobuf:"bytes,4,opt,name=user_Face,json=userFace,proto3" json:"user_Face,omitempty"`
-	User_Sex   int32                  `protobuf:"varint,5,opt,name=User_Sex,json=UserSex,proto3" json:"User_Sex,omitempty"`
+	User_Sex   int64                  `protobuf:"varint,5,opt,name=User_Sex,json=UserSex,proto3" json:"User_Sex,omitempty"`
 	User_Email string                 `protobuf:"bytes,6,opt,name=user_Email,json=userEmail,proto3" json:"user_Email,omitempty"`
 	User_Phone string                 `protobuf:"bytes,7,opt,name=user_Phone,json=userPhone,proto3" json:"user_Phone,omitempty"`
 	CreateTime *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=create_time,json=createTime,proto3" json:"create_time,omitempty"`
@@ -400,7 +400,7 @@ func (x *User) GetUser_Face() string {
 	return ""
 }
 
-func (x *User) GetUser_Sex() int32 {
+func (x *User) GetUser_Sex() int64 {
 	if x != nil {
 		return x.User_Sex
 	}

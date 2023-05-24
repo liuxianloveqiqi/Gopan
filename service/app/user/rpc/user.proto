@@ -37,12 +37,13 @@ message UserInfo {
   string passWord = 2;
   string user_Nick = 3;
   string user_Face = 4;
-  int32 User_Sex = 5;
+  int64 User_Sex = 5;
   string user_Email = 6;
   string user_Phone = 7;
   google.protobuf.Timestamp create_time = 8;
   google.protobuf.Timestamp update_time = 9;
   google.protobuf.Timestamp delete_time = 10;
+  string
 }
 
 message UserList {
