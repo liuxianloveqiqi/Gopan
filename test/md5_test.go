@@ -1,7 +1,7 @@
 package test
 
 import (
-	"Gopan/service/common/utils"
+	"Gopan/common/utils"
 	"fmt"
 	"testing"
 )

@@ -12,7 +12,7 @@ import (
 
 func TestMinio(t *testing.T) {
 	// 连接到 MinIO 集群
-	endpoint := "localhost:9000"
+	endpoint := "localhost:7878"
 	accessKey := "minioadmin"
 	secretKey := "minioadmin"
 	useSSL := false
