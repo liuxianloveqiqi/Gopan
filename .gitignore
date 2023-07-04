@@ -3,3 +3,4 @@
 *.iml
 *.yaml
 .env
+.idea
