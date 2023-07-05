@@ -6,3 +6,5 @@ go run user.go -f etc/user.yaml
 goctl model mysql datasource -url="root:123456@tcp(127.0.0.1:3306)/gopan" -table="*"  -dir="./service/app/user/model"
 
 redis-cli --cluster create 43.139.195.17:6379 43.139.195.17:6380 43.139.195.17:6381 43.139.195.17:6382 43.139.195.17:6383 43.139.195.17:6384 --cluster-replicas 1
+
+docker build -t gopan-user-rpc -f ./app/user/rpc/Dockerfile .

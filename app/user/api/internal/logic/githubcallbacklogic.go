@@ -42,13 +42,11 @@ func (l *GithubCallbackLogic) GithubCallback() (resp *types.TokenResp, err error
 			UserSex:    2,
 			CreateTime: time.Now(),
 			UpdateTime: time.Now(),
-			DeleteTime: time.Now(),
 		}
 		l.svcCtx.MysqlDb.Create(&user1)
 		user1_auth := model.UserAuth{
 			CreateTime: time.Now(),
 			UpdateTime: time.Now(),
-			DeleteTime: time.Now(),
 			UserId:     user1.UserId,
 			ProviderId: l.ctx.Value("github_id").(string),
 			Provider:   "github",

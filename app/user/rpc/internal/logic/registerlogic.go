@@ -7,7 +7,8 @@ import (
 	"Gopan/common/errorx"
 	"Gopan/common/utils"
 	"context"
-	"errors"
+	"github.com/pkg/errors"
+
 	"fmt"
 	"time"
 
@@ -32,10 +33,10 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.CommonResp, error)
 	// todo: add your logic here and delete this line
 	vc, err := l.svcCtx.Rdb.Get(l.ctx, in.UserPhone).Result()
 	if err != nil {
-		return nil, errors.New("10003:" + errorx.ERRNoPhone)
+		return nil, errors.Wrapf(errorx.NewCodeError(10003, errorx.ERRNoPhone), "该手机号码不存在: %v", in.UserPhone)
 	}
 	if in.VeCode != vc {
-		return nil, errors.New("10004:" + errorx.ERRValidateCode)
+		return nil, errors.Wrapf(errorx.NewCodeError(10004, errorx.ERRValidateCode), "验证码错误：%v", in.VeCode)
 	}
 	users, err := l.svcCtx.UserModel.FindUserBy(l.svcCtx.MasterDb, "user_phone", in.UserPhone)
 	if err != nil {
@@ -52,7 +53,6 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.CommonResp, error)
 			UserPhone:  in.UserPhone,
 			CreateTime: time.Now(),
 			UpdateTime: time.Now(),
-			DeleteTime: time.Now(),
 		}
 		l.svcCtx.MasterDb.Create(&user0)
 		return &user.CommonResp{

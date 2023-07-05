@@ -30,7 +30,7 @@ func (l *LoginLogic) Login(in *user.LoginReq) (*user.CommonResp, error) {
 	user0 := model.User{}
 	r := l.svcCtx.MasterDb.Where("user_phone = ? or user_email = ?", in.PhoneOrEmail, in.PhoneOrEmail).First(&user0)
 	if r.RowsAffected == 0 {
-		return nil, errors.Wrapf(errors.New("10005:"+errorx.ERRPhoneOrEmail), "mobile:%s,phone:%v", in.PhoneOrEmail, in.PhoneOrEmail)
+		return nil, errors.Wrapf(errorx.NewCodeError(10005, errorx.ERRPhoneOrEmail), "mobile:%s,phone:%v", in.PhoneOrEmail, in.PhoneOrEmail)
 	}
 	if r.Error != nil {
 		return nil, errors.Wrapf(errorx.NewDefaultError(r.Error.Error()), "mobile:%s,phone:%v", in.PhoneOrEmail, in.PhoneOrEmail)
@@ -38,7 +38,7 @@ func (l *LoginLogic) Login(in *user.LoginReq) (*user.CommonResp, error) {
 	}
 
 	if !utils.ValidMd5Password(in.PassWord, "liuxian", user0.PassWord) {
-		return nil, errors.Wrapf(errors.New("10006:"+errorx.ERRLoginPassword), "password:%v", in.PassWord)
+		return nil, errors.Wrapf(errorx.NewCodeError(10006, errorx.ERRLoginPassword), "password:%v", in.PassWord)
 	}
 	return &user.CommonResp{
 		UserId: user0.UserId,

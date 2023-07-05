@@ -38,7 +38,7 @@ type UserInfoItem struct {
 	PassWord   string `json:"passWord"`   // 用户密码，MD5加密
 	UserNick   string `json:"userNick"`   // 用户昵称
 	UserFace   string `json:"userFace"`   // 用户头像地址
-	UserSex    int32  `json:"userSex"`    // 用户性别：0男，1女，2保密
+	UserSex    int64  `json:"userSex"`    // 用户性别：0男，1女，2保密
 	UserEmail  string `json:"userEmail"`  // 用户邮箱
 	UserPhone  string `json:"userPhone"`  // 手机号
 	CreateTime string `json:"createTime"` // 创建时间

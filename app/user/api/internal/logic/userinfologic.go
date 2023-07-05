@@ -39,7 +39,7 @@ func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRe
 		PassWord:   cnt.Users[0].PassWord,
 		UserNick:   cnt.Users[0].User_Nick,
 		UserFace:   cnt.Users[0].User_Face,
-		UserSex:    cnt.Users[0].User_Sex,
+		UserSex:    int64(cnt.Users[0].User_Sex),
 		UserEmail:  cnt.Users[0].User_Email,
 		UserPhone:  cnt.Users[0].User_Phone,
 		CreateTime: cnt.Users[0].CreateTime.AsTime().Format("2006-01-02 15:04:05"),

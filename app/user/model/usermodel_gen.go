@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"gorm.io/gorm"
 	"strings"
 	"time"
 
@@ -39,16 +40,16 @@ type (
 	}
 
 	User struct {
-		UserId     int64     `db:"user_id"`                             // 用户ID
-		PassWord   string    `db:"pass_Word"`                           // 用户密码，MD5加密
-		UserNick   string    `db:"user_Nick" gorm:"column:user_Nick"`   // 用户昵称
-		UserFace   string    `db:"user_Face" gorm:"column:user_Face"`   // 用户头像地址
-		UserSex    int32     `db:"User_Sex" gorm:"column:User_Sex"`     // 用户性别：0男，1女，2保密
-		UserEmail  string    `db:"user_Email" gorm:"column:user_Email"` // 用户邮箱
-		UserPhone  string    `db:"user_Phone" gorm:"column:user_Phone"` // 手机号
-		CreateTime time.Time `db:"create_time"`                         // 创建时间
-		UpdateTime time.Time `db:"update_time"`                         // 更新时间
-		DeleteTime time.Time `db:"delete_time"`
+		UserId     int64          `db:"user_id"`                             // 用户ID
+		PassWord   string         `db:"pass_Word"`                           // 用户密码，MD5加密
+		UserNick   string         `db:"user_Nick" gorm:"column:user_Nick"`   // 用户昵称
+		UserFace   string         `db:"user_Face" gorm:"column:user_Face"`   // 用户头像地址
+		UserSex    int32          `db:"User_Sex" gorm:"column:User_Sex"`     // 用户性别：0男，1女，2保密
+		UserEmail  string         `db:"user_Email" gorm:"column:user_Email"` // 用户邮箱
+		UserPhone  string         `db:"user_Phone" gorm:"column:user_Phone"` // 手机号
+		CreateTime time.Time      `gorm:"column:create_time"`                // 创建时间
+		UpdateTime time.Time      `gorm:"column:update_time"`                // 更新时间
+		DeleteTime gorm.DeletedAt `gorm:"index " db:"delete_time"`           // 删除时间
 	}
 )
 

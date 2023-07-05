@@ -34,7 +34,7 @@ func (l *UserInfoLogic) UserInfo(in *user.UserInfoReq) (*user.UserList, error) {
 	user0 := model.User{}
 	r := l.svcCtx.MasterDb.Where("user_id = ?", in.UserId).First(&user0)
 	if r.RowsAffected == 0 {
-		return nil, errors.Wrapf(errors.New("20001:"+errorx.ErrMysqlDateNoResult), "用户信息数据库查询为空")
+		return nil, errors.Wrapf(errorx.NewCodeError(20001, errorx.ErrMysqlDateNoResult), "用户信息数据库查询为空")
 	}
 	if r.Error != nil {
 		return nil, errors.Wrapf(errorx.NewDefaultError(r.Error.Error()), "用户信息数据库查询错误 err：%v", r.Error)
@@ -50,7 +50,7 @@ func (l *UserInfoLogic) UserInfo(in *user.UserInfoReq) (*user.UserList, error) {
 		User_Phone: user0.UserPhone,
 		CreateTime: timestamppb.New(user0.CreateTime),
 		UpdateTime: timestamppb.New(user0.UpdateTime),
-		DeleteTime: timestamppb.New(user0.DeleteTime),
+		DeleteTime: timestamppb.New(user0.DeleteTime.Time),
 	}
 	users = append(users, user1)
 	fmt.Println("这里是users:   ", users)
