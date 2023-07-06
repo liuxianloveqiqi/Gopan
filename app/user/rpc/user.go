@@ -6,6 +6,7 @@ import (
 	"Gopan/app/user/rpc/internal/svc"
 	"Gopan/app/user/rpc/types/user"
 	"Gopan/common/errorx"
+	"Gopan/common/logs/zapx"
 	"Gopan/common/response/rpcserver"
 	"context"
 	"flag"
@@ -50,10 +51,9 @@ func main() {
 			return http.StatusInternalServerError, nil
 		}
 	})
-	logx.Close()
-	//writer, err := zapx.NewZapWriter()
-	//logx.Must(err)
-	//logx.SetWriter(writer)
+	writer, err := zapx.NewZapWriter()
+	logx.Must(err)
+	logx.SetWriter(writer)
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
 }

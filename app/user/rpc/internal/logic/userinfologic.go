@@ -52,6 +52,7 @@ func (l *UserInfoLogic) UserInfo(in *user.UserInfoReq) (*user.UserList, error) {
 		UpdateTime: timestamppb.New(user0.UpdateTime),
 		DeleteTime: timestamppb.New(user0.DeleteTime.Time),
 	}
+	logx.Error("测试的日志2")
 	users = append(users, user1)
 	fmt.Println("这里是users:   ", users)
 	return &user.UserList{

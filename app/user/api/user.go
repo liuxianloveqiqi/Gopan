@@ -5,6 +5,7 @@ import (
 	"Gopan/app/user/api/internal/handler"
 	"Gopan/app/user/api/internal/svc"
 	"Gopan/common/errorx"
+	"Gopan/common/logs/zapx"
 	"context"
 	"flag"
 	"fmt"
@@ -38,10 +39,9 @@ func main() {
 			return http.StatusInternalServerError, nil
 		}
 	})
-	logx.Close()
-	//writer, err := zapx.NewZapWriter()
-	//logx.Must(err)
-	//logx.SetWriter(writer)
+	writer, err := zapx.NewZapWriter()
+	logx.Must(err)
+	logx.SetWriter(writer)
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()
 }

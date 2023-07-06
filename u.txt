@@ -8,3 +8,15 @@ goctl model mysql datasource -url="root:123456@tcp(127.0.0.1:3306)/gopan" -table
 redis-cli --cluster create 43.139.195.17:6379 43.139.195.17:6380 43.139.195.17:6381 43.139.195.17:6382 43.139.195.17:6383 43.139.195.17:6384 --cluster-replicas 1
 
 docker build -t gopan-user-rpc -f ./app/user/rpc/Dockerfile .
+
+docker run -it --privileged --pid=host justincormack/nsenter1
+
+2023-07-06 00:23:39 2023/07/06 00:23:39 {"@timestamp":"2023-07-06T00:23:39.670+08","level":"error","content":"cpu_linux.go:29 open cpuacct.usage_percpu: no such file or directory"}
+2023-07-06 00:24:39 {"@timestamp":"2023-07-06T00:24:39.674+08","level":"stat","content":"CPU: 0m, MEMORY: Alloc=2.1Mi, TotalAlloc=3.6Mi, Sys=14.5Mi, NumGC=1"}
+2023-07-06 00:25:39 {"@timestamp":"2023-07-06T00:25:39.674+08","level":"stat","content":"CPU: 0m, MEMORY: Alloc=3.1Mi, TotalAlloc=4.7Mi, Sys=14.5Mi, NumGC=1"}
+2023-07-06 00:26:39 {"@timestamp":"2023-07-06T00:26:39.675+08","level":"stat","content":"CPU: 0m, MEMORY: Alloc=2.0Mi, TotalAlloc=5.7Mi, Sys=15.1Mi, NumGC=2"}
+
+./kafka-console-consumer.sh --bootstrap-server kafka:9092  --topic gopan-log --from-beginning
+./kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 -partitions 1 --topic gopan-log
+
+./kafka-topics.sh  --create --bootstrap-server kafka:9092 --replication-factor 1 --partitions 1 --topic gopan-log

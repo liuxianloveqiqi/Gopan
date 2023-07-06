@@ -25,7 +25,7 @@ func (w *KafkaWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 func LogxKafka() *logx.Writer {
-	pusher := kq.NewPusher([]string{"localhost:9092"}, "log")
+	pusher := kq.NewPusher([]string{"localhost:9092"}, "gopan-log")
 	defer pusher.Close()
 
 	writer := logx.NewWriter(NewKafkaWriter(pusher))
