@@ -18,3 +18,8 @@ const (
 	ErrHeadFormat = "请求头中auth格式有误" //30002
 	ErrTokenProve = "token验证错误"    // 30003
 )
+
+const (
+	ErrFileOpen = "打开文件错误" //40001
+
+)

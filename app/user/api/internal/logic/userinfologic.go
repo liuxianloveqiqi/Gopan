@@ -5,8 +5,8 @@ import (
 	"Gopan/app/user/api/internal/types"
 	"Gopan/app/user/rpc/types/user"
 	"context"
-	"fmt"
 	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/core/logc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -46,6 +46,6 @@ func (l *UserInfoLogic) UserInfo(req *types.UserInfoReq) (resp *types.UserInfoRe
 		UpdateTime: cnt.Users[0].UpdateTime.AsTime().Format("2006-01-02 15:04:05"),
 		DeleteTime: cnt.Users[0].DeleteTime.AsTime().Format("2006-01-02 15:04:05"),
 	}
-	fmt.Println("这里是usrinfo:", ret)
+	logc.Info(l.ctx, "这里是usrinfo:", ret)
 	return &types.UserInfoResp{UserInfo: &ret}, nil
 }

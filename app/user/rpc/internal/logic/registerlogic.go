@@ -8,8 +8,8 @@ import (
 	"Gopan/common/utils"
 	"context"
 	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/core/logc"
 
-	"fmt"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -44,7 +44,7 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.CommonResp, error)
 	}
 	var user0 model.User
 	if len(users) == 0 {
-		fmt.Println("该用户为新用户，开始注册")
+		logc.Info(l.ctx, "该用户为新用户，开始注册")
 		// 新建用户
 		user0 = model.User{
 			PassWord:   utils.Md5Password(utils.GeneratePassword(10), "liuxian"),
@@ -60,7 +60,7 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.CommonResp, error)
 		}, nil
 	} else {
 		user0 = users[0]
-		fmt.Println("该用户已经注册，直接登陆")
+		logc.Info(l.ctx, "该用户已经注册，直接登陆")
 		return &user.CommonResp{
 			UserId: user0.UserId,
 		}, nil

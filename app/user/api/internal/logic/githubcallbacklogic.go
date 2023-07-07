@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/zeromicro/go-zero/core/logc"
 	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -35,6 +36,8 @@ func (l *GithubCallbackLogic) GithubCallback() (resp *types.TokenResp, err error
 	r := l.svcCtx.MysqlDb.Where("provider= ? and provider_id =?", "github", l.ctx.Value("github_id")).First(&user_auth0)
 	if r.RowsAffected == 0 {
 		fmt.Println("该用户为githubu新用户，开始注册")
+		logc.Info(l.ctx, "该用户为githubu新用户，开始注册")
+
 		// 新建用户
 		user1 := model.User{
 			PassWord:   utils.Md5Password(utils.GeneratePassword(10), "liuxian"),
@@ -44,20 +47,23 @@ func (l *GithubCallbackLogic) GithubCallback() (resp *types.TokenResp, err error
 			UpdateTime: time.Now(),
 		}
 		l.svcCtx.MysqlDb.Create(&user1)
+		var user model.User
+		l.svcCtx.MysqlDb.Last(&user)
+		fmt.Println("user id ========", user.UserId)
 		user1_auth := model.UserAuth{
 			CreateTime: time.Now(),
 			UpdateTime: time.Now(),
-			UserId:     user1.UserId,
+			UserId:     user.UserId,
 			ProviderId: l.ctx.Value("github_id").(string),
 			Provider:   "github",
 		}
 		l.svcCtx.MysqlDb.Create(&user1_auth)
-		accessTokenString, refreshTokenString := utils.GetToken(user1.UserId, uuid.New().String())
+		accessTokenString, refreshTokenString := utils.GetToken(user.UserId, uuid.New().String())
 		if accessTokenString == "" || refreshTokenString == "" {
 			return nil, errorx.NewCodeError(100002, "生成jwt错误")
 		}
 		return &types.TokenResp{
-			UserId:       user1.UserId,
+			UserId:       user.UserId,
 			AccessToken:  accessTokenString,
 			RefreshToken: refreshTokenString,
 		}, nil

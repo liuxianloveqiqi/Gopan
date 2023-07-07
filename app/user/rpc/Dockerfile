@@ -12,7 +12,7 @@ WORKDIR /build
 
 ADD go.mod .
 ADD go.sum .
-RUN go mod download
+RUN go mod upload
 COPY . .
 COPY app/user/rpc/etc /app/etc
 RUN go build -ldflags="-s -w" -o /app/user app/user/rpc/user.go

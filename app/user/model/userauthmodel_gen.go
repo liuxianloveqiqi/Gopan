@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"gorm.io/gorm"
 	"strings"
 	"time"
 
@@ -39,13 +40,13 @@ type (
 	}
 
 	UserAuth struct {
-		Id         int64     `db:"id"`
-		CreateTime time.Time `db:"create_time"`
-		UpdateTime time.Time `db:"update_time"`
-		DeleteTime time.Time `db:"delete_time"`
-		UserId     int64     `db:"user_id"`
-		ProviderId string    `db:"provider_id"` // 平台唯一id
-		Provider   string    `db:"provider"`    // 平台类型
+		Id         int64          `db:"id" gorm:"column:id"`
+		CreateTime time.Time      `gorm:"column:create_time"` // 创建时间
+		UpdateTime time.Time      `gorm:"column:update_time"` // 更新时间
+		DeleteTime gorm.DeletedAt `gorm:"index " db:"delete_time"`
+		UserId     int64          `db:"user_id" gorm:"column:user_id"`
+		ProviderId string         `db:"provider_id" gorm:"column:provider_id"` // 平台唯一id
+		Provider   string         `db:"provider" gorm:"column:provider"`       // 平台名称
 	}
 )
 

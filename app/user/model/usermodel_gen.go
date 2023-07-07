@@ -40,8 +40,8 @@ type (
 	}
 
 	User struct {
-		UserId     int64          `db:"user_id"`                             // 用户ID
-		PassWord   string         `db:"pass_Word"`                           // 用户密码，MD5加密
+		UserId     int64          `db:"user_id" gorm:"column:user_id"`       // 用户ID
+		PassWord   string         `db:"pass_Word" gorm:"column:pass_Word"`   // 用户密码，MD5加密
 		UserNick   string         `db:"user_Nick" gorm:"column:user_Nick"`   // 用户昵称
 		UserFace   string         `db:"user_Face" gorm:"column:user_Face"`   // 用户头像地址
 		UserSex    int32          `db:"User_Sex" gorm:"column:User_Sex"`     // 用户性别：0男，1女，2保密

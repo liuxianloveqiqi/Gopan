@@ -28,7 +28,7 @@ func TestDown(t *testing.T) {
 	// 设置存储桶名称和文件名称
 	bucketName := "hehe"
 	objectName := "hello.txt"
-	filePath := "/Users/liuxian/GoProjects/project/Gopan/1-download.txt"
+	filePath := "/Users/liuxian/GoProjects/project/Gopan/1-upload.txt"
 	// 下载文件
 	err = minioClient.FGetObject(context.TODO(), bucketName, objectName, filePath, minio.GetObjectOptions{})
 	if err != nil {

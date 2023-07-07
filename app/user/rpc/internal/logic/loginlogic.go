@@ -36,7 +36,6 @@ func (l *LoginLogic) Login(in *user.LoginReq) (*user.CommonResp, error) {
 		return nil, errors.Wrapf(errorx.NewDefaultError(r.Error.Error()), "mobile:%s,phone:%v", in.PhoneOrEmail, in.PhoneOrEmail)
 
 	}
-	logx.Error("测试的日志3")
 	if !utils.ValidMd5Password(in.PassWord, "liuxian", user0.PassWord) {
 		return nil, errors.Wrapf(errorx.NewCodeError(10006, errorx.ERRLoginPassword), "password:%v", in.PassWord)
 	}

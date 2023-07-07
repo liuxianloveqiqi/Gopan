@@ -7,8 +7,8 @@ import (
 	"Gopan/common/errorx"
 	"context"
 	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/core/logc"
 
-	"fmt"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -52,9 +52,8 @@ func (l *UserInfoLogic) UserInfo(in *user.UserInfoReq) (*user.UserList, error) {
 		UpdateTime: timestamppb.New(user0.UpdateTime),
 		DeleteTime: timestamppb.New(user0.DeleteTime.Time),
 	}
-	logx.Error("测试的日志2")
 	users = append(users, user1)
-	fmt.Println("这里是users:   ", users)
+	logc.Info(l.ctx, "这里是users:   ", users)
 	return &user.UserList{
 		Users: users,
 	}, nil

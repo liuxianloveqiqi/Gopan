@@ -1,9 +1,6 @@
 package main
 
 import (
-	"Gopan/app/user/api/internal/config"
-	"Gopan/app/user/api/internal/handler"
-	"Gopan/app/user/api/internal/svc"
 	"Gopan/common/errorx"
 	"Gopan/common/logs/zapx"
 	"context"
@@ -13,15 +10,19 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
 
+	"Gopan/app/upload/api/internal/config"
+	"Gopan/app/upload/api/internal/handler"
+	"Gopan/app/upload/api/internal/svc"
+
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
 )
 
-var configFile = flag.String("f", "etc/user-api.yaml", "the config file.sql")
+var configFile = flag.String("f", "etc/upload-api.yaml", "the config file")
 
 func main() {
 	flag.Parse()
-	logx.Close()
+
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 

@@ -1,0 +1,27 @@
+syntax = "v1"  // 版本号
+
+// 接口信息
+info(
+	title: "Gopan/user.api"
+	author: "liuxian"
+	version: "1.0.0"
+)
+type (
+	// 上传文件
+	FileUploadReq {
+		// 上传文件的存储类型
+		CurrentStoreType int64 `form:"currentStoreType" validate:"required,in=1|2|3|4|5"`
+	}
+)
+
+@server(
+	middleware: JWT // 路由中间件声明
+	prefix: file
+)
+service file-api {
+	@doc(
+		summary: "上传文件"
+	)
+	@handler fileUpload
+	post  /upload (FileUploadReq) returns ()
+}
