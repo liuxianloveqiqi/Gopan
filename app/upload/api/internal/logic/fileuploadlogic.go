@@ -11,13 +11,13 @@ import (
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/core/logc"
+	"github.com/zeromicro/go-zero/core/logx"
 	"io"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
-	"time"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type FileUploadLogic struct {
@@ -34,11 +34,16 @@ func NewFileUploadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileUp
 	}
 }
 
-func (l *FileUploadLogic) COS(name string) {
+func (l *FileUploadLogic) COSUpload(filePath string, file *multipart.FileHeader) error {
 	Url := l.svcCtx.Config.TecentCOS.Url
 	SecretId := l.svcCtx.Config.TecentCOS.SecretId
 	SecretKey := l.svcCtx.Config.TecentCOS.SecretKey
-	utils.TecentCOS(Url, SecretId, SecretKey, name)
+	err := utils.TecentCOSUpload(Url, SecretId, SecretKey, filePath, file)
+	if err != nil {
+		logc.Error(l.ctx, "上传文件失败")
+		return err
+	}
+	return nil
 }
 func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWriter, r *http.Request) error {
 	// todo: add your logic here and delete this line
@@ -50,13 +55,18 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 	}
 	defer file.Close()
 	// 添加文件元数据
-	fileMeta := model.FileMeta{
+	//fileMeta := model.FileMeta{
+	//	FileName: head.Filename,
+	//	Location: "/Users/liuxian/GoProjects/project/Gopan/tmp/" + head.Filename,
+	//	UploadAt: time.Now().Format("2006-01-02 15:04:05"),
+	//}
+	fileMeta := model.File{
 		FileName: head.Filename,
-		Location: "/Users/liuxian/GoProjects/project/Gopan/tmp/" + head.Filename,
-		UploadAt: time.Now().Format("2006-01-02 15:04:05"),
+		FileSize: head.Size,
+		FileAddr: "/Users/liuxian/GoProjects/project/Gopan/tmp/" + head.Filename,
 	}
 
-	newFile, err := os.Create(fileMeta.Location)
+	newFile, err := os.Create(fileMeta.FileAddr)
 	if err != nil {
 		fmt.Printf("Failed to create file, err:%s\n", err.Error())
 		return errors.Wrapf(errorx.NewDefaultError(err.Error()), "创建文件句柄错误 err:%v", err)
@@ -72,13 +82,14 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 	}
 
 	newFile.Seek(0, 0)
+	// 计算文件sha1值
 	fileMeta.FileSha1 = utils.FileSha1(newFile)
 	// 偏移量重置
 	newFile.Seek(0, 0)
 
 	// 写入minio
 	if req.CurrentStoreType == int64(conf.StoreMinio) {
-		// 文件写入Ceph存储
+		// 文件写入Minio存储
 		//data, _ := io.ReadAll(newFile)
 		log.Println("开始写入minio")
 		minioPath := "/minio/" + fileMeta.FileSha1
@@ -86,11 +97,19 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 		// 上传文件到 MinIO
 		_, err = l.svcCtx.MinioDb.PutObject(context.TODO(), bucketName, fileMeta.FileName, newFile, -1, minio.PutObjectOptions{})
 		if err != nil {
-			log.Fatalln(err)
-			return errors.Wrapf(errorx.NewDefaultError(err.Error()), "上传文件到minio错误 err : %v", err)
+			log.Println(err)
+			return errors.Wrapf(errorx.NewDefaultError("上传文件失败 err:"+err.Error()), "上传文件到minio错误 err : %v", err)
+		}
+		fileMeta.FileAddr = minioPath
+	} else if req.CurrentStoreType == int64(conf.StoreCOS) {
+		log.Println("开始写入cos")
+		cosPath := "cos/" + fileMeta.FileSha1
+		// 写入COS
+		err = l.COSUpload(cosPath, head)
+		if err != nil {
+			return errors.Wrapf(errorx.NewDefaultError("上传文件失败 err:"+err.Error()), "上传文件到COS错误 err:%v", err)
 		}
 
-		fileMeta.Location = minioPath
 	}
 	return nil
 }

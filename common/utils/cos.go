@@ -9,11 +9,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"path"
 	"time"
 )
 
-func TecentCOSUpload(urlvalue, id, key, filename string,file *multipart.FileHeader, newSavePath string) {
+func TecentCOSUpload(urlvalue, id, key, filePath string, file *multipart.FileHeader) error {
 	//COS客户端连接
 	u, _ := url.Parse(urlvalue)
 	b := &cos.BaseURL{BucketURL: u}
@@ -27,23 +26,17 @@ func TecentCOSUpload(urlvalue, id, key, filename string,file *multipart.FileHead
 		},
 	})
 
-
-		// 3.通过文件流上传对象
-		fd, err := file.Open()
-		if err != nil {
-			return false, ""
-		}
-		defer fd.Close()
-
-		_, saveErr = c.Object.Put(context.Background(), saveFilePath, fd, nil)
-
-		if saveErr == nil {
-			//  上传成功,返回资源的相对路径，这里请根据实际返回绝对路径或者相对路径
-			return true, saveFilePath
-		}
+	// 3.通过文件流上传对象
+	fd, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer fd.Close()
+	_, saveErr := c.Object.Put(context.Background(), filePath, fd, nil)
+	if saveErr == nil {
+		return nil
 	} else {
-		saveErr = errors.New(my_errors.ErrorsSnowflakeGetIdFail)
-		variable.ZapLog.Error("文件保存出错：" + saveErr.Error())
+		return saveErr
 	}
 
 }

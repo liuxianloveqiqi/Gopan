@@ -25,3 +25,9 @@ func NewFileModel(conn sqlx.SqlConn, c cache.CacheConf) FileModel {
 		defaultFileModel: newFileModel(conn, c),
 	}
 }
+
+// 新增/更新文件元信息到mysql中
+func (m *defaultFileModel) UpdateFileMeta(filehash string, filename string,
+	filesize int64, fileaddr string) {
+
+}

@@ -23,15 +23,15 @@ var (
 	userFileRowsExpectAutoSet   = strings.Join(stringx.Remove(userFileFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
 	userFileRowsWithPlaceHolder = strings.Join(stringx.Remove(userFileFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 
-	cacheUserFileIdPrefix               = "cache:userFile:id:"
-	cacheUserFileUserNameFileSha1Prefix = "cache:userFile:userName:fileSha1:"
+	cacheUserFileIdPrefix             = "cache:userFile:id:"
+	cacheUserFileUserIdFileSha1Prefix = "cache:userFile:userId:fileSha1:"
 )
 
 type (
 	userFileModel interface {
 		Insert(ctx context.Context, data *UserFile) (sql.Result, error)
 		FindOne(ctx context.Context, id int64) (*UserFile, error)
-		FindOneByUserNameFileSha1(ctx context.Context, userName string, fileSha1 string) (*UserFile, error)
+		FindOneByUserIdFileSha1(ctx context.Context, userId int64, fileSha1 string) (*UserFile, error)
 		Update(ctx context.Context, data *UserFile) error
 		Delete(ctx context.Context, id int64) error
 	}
@@ -42,9 +42,8 @@ type (
 	}
 
 	UserFile struct {
-		gorm.Model
 		Id         int64          `gorm:"column:id;primaryKey" db:"id"`
-		UserName   string         `gorm:"column:user_name" db:"user_name"`
+		UserId     int64          `gorm:"column:user_id" db:"user_id"`
 		FileSha1   string         `gorm:"column:file_sha1" db:"file_sha1"`
 		FileSize   int64          `gorm:"column:file_size" db:"file_size"`
 		FileName   string         `gorm:"column:file_name" db:"file_name"`
@@ -69,11 +68,11 @@ func (m *defaultUserFileModel) Delete(ctx context.Context, id int64) error {
 	}
 
 	userFileIdKey := fmt.Sprintf("%s%v", cacheUserFileIdPrefix, id)
-	userFileUserNameFileSha1Key := fmt.Sprintf("%s%v:%v", cacheUserFileUserNameFileSha1Prefix, data.UserName, data.FileSha1)
+	userFileUserIdFileSha1Key := fmt.Sprintf("%s%v:%v", cacheUserFileUserIdFileSha1Prefix, data.UserId, data.FileSha1)
 	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
 		return conn.ExecCtx(ctx, query, id)
-	}, userFileIdKey, userFileUserNameFileSha1Key)
+	}, userFileIdKey, userFileUserIdFileSha1Key)
 	return err
 }
 
@@ -94,12 +93,12 @@ func (m *defaultUserFileModel) FindOne(ctx context.Context, id int64) (*UserFile
 	}
 }
 
-func (m *defaultUserFileModel) FindOneByUserNameFileSha1(ctx context.Context, userName string, fileSha1 string) (*UserFile, error) {
-	userFileUserNameFileSha1Key := fmt.Sprintf("%s%v:%v", cacheUserFileUserNameFileSha1Prefix, userName, fileSha1)
+func (m *defaultUserFileModel) FindOneByUserIdFileSha1(ctx context.Context, userId int64, fileSha1 string) (*UserFile, error) {
+	userFileUserIdFileSha1Key := fmt.Sprintf("%s%v:%v", cacheUserFileUserIdFileSha1Prefix, userId, fileSha1)
 	var resp UserFile
-	err := m.QueryRowIndexCtx(ctx, &resp, userFileUserNameFileSha1Key, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v interface{}) (i interface{}, e error) {
-		query := fmt.Sprintf("select %s from %s where `user_name` = ? and `file_sha1` = ? limit 1", userFileRows, m.table)
-		if err := conn.QueryRowCtx(ctx, &resp, query, userName, fileSha1); err != nil {
+	err := m.QueryRowIndexCtx(ctx, &resp, userFileUserIdFileSha1Key, m.formatPrimary, func(ctx context.Context, conn sqlx.SqlConn, v interface{}) (i interface{}, e error) {
+		query := fmt.Sprintf("select %s from %s where `user_id` = ? and `file_sha1` = ? limit 1", userFileRows, m.table)
+		if err := conn.QueryRowCtx(ctx, &resp, query, userId, fileSha1); err != nil {
 			return nil, err
 		}
 		return resp.Id, nil
@@ -116,11 +115,11 @@ func (m *defaultUserFileModel) FindOneByUserNameFileSha1(ctx context.Context, us
 
 func (m *defaultUserFileModel) Insert(ctx context.Context, data *UserFile) (sql.Result, error) {
 	userFileIdKey := fmt.Sprintf("%s%v", cacheUserFileIdPrefix, data.Id)
-	userFileUserNameFileSha1Key := fmt.Sprintf("%s%v:%v", cacheUserFileUserNameFileSha1Prefix, data.UserName, data.FileSha1)
+	userFileUserIdFileSha1Key := fmt.Sprintf("%s%v:%v", cacheUserFileUserIdFileSha1Prefix, data.UserId, data.FileSha1)
 	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?)", m.table, userFileRowsExpectAutoSet)
-		return conn.ExecCtx(ctx, query, data.UserName, data.FileSha1, data.FileSize, data.FileName, data.DeleteTime, data.Status)
-	}, userFileIdKey, userFileUserNameFileSha1Key)
+		return conn.ExecCtx(ctx, query, data.UserId, data.FileSha1, data.FileSize, data.FileName, data.DeleteTime, data.Status)
+	}, userFileIdKey, userFileUserIdFileSha1Key)
 	return ret, err
 }
 
@@ -131,11 +130,11 @@ func (m *defaultUserFileModel) Update(ctx context.Context, newData *UserFile) er
 	}
 
 	userFileIdKey := fmt.Sprintf("%s%v", cacheUserFileIdPrefix, data.Id)
-	userFileUserNameFileSha1Key := fmt.Sprintf("%s%v:%v", cacheUserFileUserNameFileSha1Prefix, data.UserName, data.FileSha1)
+	userFileUserIdFileSha1Key := fmt.Sprintf("%s%v:%v", cacheUserFileUserIdFileSha1Prefix, data.UserId, data.FileSha1)
 	_, err = m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, userFileRowsWithPlaceHolder)
-		return conn.ExecCtx(ctx, query, newData.UserName, newData.FileSha1, newData.FileSize, newData.FileName, newData.DeleteTime, newData.Status, newData.Id)
-	}, userFileIdKey, userFileUserNameFileSha1Key)
+		return conn.ExecCtx(ctx, query, newData.UserId, newData.FileSha1, newData.FileSize, newData.FileName, newData.DeleteTime, newData.Status, newData.Id)
+	}, userFileIdKey, userFileUserIdFileSha1Key)
 	return err
 }
 
