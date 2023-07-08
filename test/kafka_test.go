@@ -14,7 +14,7 @@ func TestKme(t *testing.T) {
 
 	// 构造一个消息
 	msg := &sarama.ProducerMessage{}
-	msg.Topic = "gopan-log"
+	msg.Topic = "gopan-upload"
 	msg.Value = sarama.StringEncoder("this is a test log")
 	// 连接kafka
 	client, err := sarama.NewSyncProducer([]string{"127.0.0.1:9092"}, config)

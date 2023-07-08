@@ -10,7 +10,9 @@ const (
 )
 
 const (
-	ErrMysqlDateNoResult = "用户信息查询为空" //20001
+	ErrMysqlDateNoResult = "用户信息查询为空"         //20001
+	ErrFileCreat         = "file表Creat错误"     //20002
+	ErrUserFlileCreat    = "userfile表Creat错误" //20003
 )
 
 const (
@@ -20,6 +22,7 @@ const (
 )
 
 const (
-	ErrFileOpen = "打开文件错误" //40001
-
+	ErrFileOpen          = "打开文件错误"                //40001
+	ErrKafkaFileMeta     = "kafka异步fileMeta失败"     //40002
+	ErrKafkaUserFileMeta = "kafka异步userfileMate失败" //40003
 )

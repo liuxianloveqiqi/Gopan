@@ -43,6 +43,7 @@ func main() {
 	writer, err := zapx.NewZapWriter()
 	logx.Must(err)
 	logx.SetWriter(writer)
+
 	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
 	server.Start()
 }

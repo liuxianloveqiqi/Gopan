@@ -4,10 +4,12 @@ import (
 	"Gopan/app/upload/api/internal/svc"
 	"Gopan/app/upload/api/internal/types"
 	"Gopan/app/upload/model"
+	"Gopan/common/batcher"
 	"Gopan/common/conf"
 	"Gopan/common/errorx"
 	"Gopan/common/utils"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/pkg/errors"
@@ -18,6 +20,8 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 )
 
 type FileUploadLogic struct {
@@ -45,8 +49,71 @@ func (l *FileUploadLogic) COSUpload(filePath string, file *multipart.FileHeader)
 	}
 	return nil
 }
+func (l *FileUploadLogic) StartBatcher(key int64, val interface{}) error {
+	var kd = make([]byte, 0)
+	var err error = nil
+	options := batcher.Options{
+		5,
+		100,
+		50,
+		10,
+	}
+	b := batcher.New(options)
+
+	b.Sharding = func(key string) int {
+		pid, _ := strconv.ParseInt(key, 10, 64)
+		return int(pid) % options.Worker
+	}
+	if _, ok := val.(*model.File); ok {
+		b.Do = func(ctx context.Context, val map[string][]interface{}) {
+			var msgs []*model.File
+			for _, vs := range val {
+				for _, v := range vs {
+					msgs = append(msgs, v.(*model.File))
+				}
+			}
+			kd, err = json.Marshal(msgs)
+			if err != nil {
+				logx.Errorf("Batcher.Do json.Marshal msgs: %v error: %v", msgs, err)
+			}
+			if err = l.svcCtx.KqPusherClient.Push(string(kd)); err != nil {
+				logx.Errorf("KafkaPusher.Push kd: %s error: %v", string(kd), err)
+			}
+		}
+	} else if _, ok := val.(*model.UserFile); ok {
+		b.Do = func(ctx context.Context, val map[string][]interface{}) {
+			var msgs []*model.UserFile
+			for _, vs := range val {
+				for _, v := range vs {
+					msgs = append(msgs, v.(*model.UserFile))
+				}
+			}
+			kd, err = json.Marshal(msgs)
+			if err != nil {
+				logx.Errorf("Batcher.Do json.Marshal msgs: %v error: %v", msgs, err)
+			}
+			if err = l.svcCtx.KqPusherClient.Push(string(kd)); err != nil {
+				logx.Errorf("KafkaPusher.Push kd: %s error: %v", string(kd), err)
+			}
+		}
+	}
+	b.Start()
+
+	err = b.Add(strconv.FormatInt(key, 10), val)
+	if err != nil {
+		logx.Errorf("l.batcher.Add uid: %d error: %v", key, err)
+		return err
+	}
+	fmt.Println(232323232323, string(kd))
+	return err
+}
 func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWriter, r *http.Request) error {
 	// todo: add your logic here and delete this line
+	// 获取user_id
+	userId, ok := l.ctx.Value("user_id").(int64)
+	if !ok {
+		return errors.Wrapf(errorx.NewDefaultError("user_id获取失败"), "user_id获取失败 user_id:%v", userId)
+	}
 	// 接收文件流及存储到本地目录
 	file, head, err := r.FormFile("file")
 	if err != nil {
@@ -61,9 +128,12 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 	//	UploadAt: time.Now().Format("2006-01-02 15:04:05"),
 	//}
 	fileMeta := model.File{
-		FileName: head.Filename,
-		FileSize: head.Size,
-		FileAddr: "/Users/liuxian/GoProjects/project/Gopan/tmp/" + head.Filename,
+		FileName:   head.Filename,
+		FileSize:   head.Size,
+		FileAddr:   "/Users/liuxian/GoProjects/project/Gopan/tmp/" + head.Filename,
+		Status:     0,
+		CreateTime: time.Now(),
+		UpdateTime: time.Now(),
 	}
 
 	newFile, err := os.Create(fileMeta.FileAddr)
@@ -86,13 +156,13 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 	fileMeta.FileSha1 = utils.FileSha1(newFile)
 	// 偏移量重置
 	newFile.Seek(0, 0)
-
-	// 写入minio
-	if req.CurrentStoreType == int64(conf.StoreMinio) {
+	switch req.CurrentStoreType {
+	case int64(conf.StoreLocal):
+	case int64(conf.StoreMinio):
 		// 文件写入Minio存储
 		//data, _ := io.ReadAll(newFile)
 		log.Println("开始写入minio")
-		minioPath := "/minio/" + fileMeta.FileSha1
+		minioPath := "minio/" + fileMeta.FileSha1
 		bucketName := "userfile"
 		// 上传文件到 MinIO
 		_, err = l.svcCtx.MinioDb.PutObject(context.TODO(), bucketName, fileMeta.FileName, newFile, -1, minio.PutObjectOptions{})
@@ -101,7 +171,9 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 			return errors.Wrapf(errorx.NewDefaultError("上传文件失败 err:"+err.Error()), "上传文件到minio错误 err : %v", err)
 		}
 		fileMeta.FileAddr = minioPath
-	} else if req.CurrentStoreType == int64(conf.StoreCOS) {
+
+	case int64(conf.StoreCOS):
+		// 写入COS
 		log.Println("开始写入cos")
 		cosPath := "cos/" + fileMeta.FileSha1
 		// 写入COS
@@ -109,7 +181,35 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 		if err != nil {
 			return errors.Wrapf(errorx.NewDefaultError("上传文件失败 err:"+err.Error()), "上传文件到COS错误 err:%v", err)
 		}
+		fileMeta.FileAddr = cosPath
 
 	}
+	// 使用kafka对Mysql存储的文件元信息进行异步处理
+	userfile := model.UserFile{
+		UserId:     2,
+		FileSha1:   fileMeta.FileSha1,
+		FileSize:   fileMeta.FileSize,
+		FileName:   fileMeta.FileName,
+		Status:     fileMeta.Status,
+		CreateTime: fileMeta.CreateTime,
+		UpdateTime: fileMeta.UpdateTime,
+	}
+	// kafka异步处理File元数据
+	err = l.StartBatcher(userId, &fileMeta)
+	if err != nil {
+		return errors.Wrapf(errorx.NewCodeError(40002, errorx.ErrKafkaFileMeta+err.Error()), "kafka异步fileMeta失败 err:%v", err)
+	}
+	// kafka异步处理UserFile元数据
+	err = l.StartBatcher(userId, &userfile)
+	if err != nil {
+		return errors.Wrapf(errorx.NewCodeError(40003, errorx.ErrKafkaUserFileMeta+err.Error()), "kafka异步UserFileMeta失败 err:%v", err)
+	}
+	//if err = l.svcCtx.MysqlDb.Create(&fileMeta).Error; err != nil {
+	//	return errors.Wrapf(errorx.NewCodeError(20002, errorx.ErrFileCreat+err.Error()), "file表Creat错误 err:%v\", err")
+	//}
+	//
+	//if err = l.svcCtx.MysqlDb.Create(&userfile).Error; err != nil {
+	//	return errors.Wrapf(errorx.NewCodeError(20003, errorx.ErrFileCreat+err.Error()), "userfile表Creat错误 err:%v\", err")
+	//}
 	return nil
 }
