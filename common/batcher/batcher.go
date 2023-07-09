@@ -3,6 +3,7 @@ package batcher
 // 批量数据聚合
 import (
 	"context"
+	"fmt"
 	"github.com/pkg/errors"
 	"log"
 	"sync"
@@ -53,7 +54,7 @@ func (b *Batcher) Start() {
 		log.Fatal("Batcher: Sharding func is nil")
 	}
 	b.wait.Add(len(b.chans))
-	// 索引的负载均衡，索引小的协程优先级高
+
 	for i, ch := range b.chans {
 		go b.merge(i, ch)
 	}
@@ -93,11 +94,11 @@ func (b *Batcher) merge(idx int, ch <-chan *msg) {
 
 	// 根据协程的索引设置对应的间隔时间
 	// 如果 idx 大于 0，则表示当前协程不是第一个协程，通过调整定时器的间隔时间来平均分配批处理操作。
-	// 较小的索引值会被分配更多的任务，而较大的索引值会被分配较少的任务
+	// 不同工作协程之间的批处理操作时间错开，可以减少并发操作的冲突和资源竞争
 	if idx > 0 {
-		interval = time.Duration(int64(idx)*(int64(b.opts.Interval)/int64(b.opts.Worker))) * time.Second
+		interval = time.Duration(int64(idx) * (int64(b.opts.Interval) / int64(b.opts.Worker)))
 	}
-
+	fmt.Println(interval)
 	ticker := time.NewTicker(interval) // 创建定时器
 	for {
 		select {

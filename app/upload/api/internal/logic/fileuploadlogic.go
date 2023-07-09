@@ -26,16 +26,49 @@ import (
 
 type FileUploadLogic struct {
 	logx.Logger
-	ctx    context.Context
-	svcCtx *svc.ServiceContext
+	ctx     context.Context
+	svcCtx  *svc.ServiceContext
+	batcher *batcher.Batcher
 }
 
 func NewFileUploadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileUploadLogic {
-	return &FileUploadLogic{
+	f := &FileUploadLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
+	// batcher配置
+	options := batcher.Options{
+		5,
+		100,
+		50,
+		10 * time.Second,
+	}
+	// 实现batcher
+	b := batcher.New(options)
+	b.Sharding = func(key string) int {
+		pid, _ := strconv.ParseInt(key, 10, 64)
+		return int(pid) % options.Worker
+	}
+	b.Do = func(ctx context.Context, val map[string][]interface{}) {
+		var msgs []*model.UserFile
+		for _, vs := range val {
+			for _, v := range vs {
+				msgs = append(msgs, v.(*model.UserFile))
+			}
+		}
+		kd, err := json.Marshal(msgs)
+		if err != nil {
+			logx.Errorf("Batcher.Do json.Marshal msgs: %v error: %v", msgs, err)
+		}
+		if err = f.svcCtx.KqPusherClient.Push(string(kd)); err != nil {
+			logx.Errorf("KafkaPusher.Push kd: %s error: %v", string(kd), err)
+		}
+	}
+	f.batcher = b
+	f.batcher.Start()
+
+	return f
 }
 
 func (l *FileUploadLogic) COSUpload(filePath string, file *multipart.FileHeader) error {
@@ -49,64 +82,7 @@ func (l *FileUploadLogic) COSUpload(filePath string, file *multipart.FileHeader)
 	}
 	return nil
 }
-func (l *FileUploadLogic) StartBatcher(key int64, val interface{}) error {
-	var kd = make([]byte, 0)
-	var err error = nil
-	options := batcher.Options{
-		5,
-		100,
-		50,
-		10,
-	}
-	b := batcher.New(options)
 
-	b.Sharding = func(key string) int {
-		pid, _ := strconv.ParseInt(key, 10, 64)
-		return int(pid) % options.Worker
-	}
-	if _, ok := val.(*model.File); ok {
-		b.Do = func(ctx context.Context, val map[string][]interface{}) {
-			var msgs []*model.File
-			for _, vs := range val {
-				for _, v := range vs {
-					msgs = append(msgs, v.(*model.File))
-				}
-			}
-			kd, err = json.Marshal(msgs)
-			if err != nil {
-				logx.Errorf("Batcher.Do json.Marshal msgs: %v error: %v", msgs, err)
-			}
-			if err = l.svcCtx.KqPusherClient.Push(string(kd)); err != nil {
-				logx.Errorf("KafkaPusher.Push kd: %s error: %v", string(kd), err)
-			}
-		}
-	} else if _, ok := val.(*model.UserFile); ok {
-		b.Do = func(ctx context.Context, val map[string][]interface{}) {
-			var msgs []*model.UserFile
-			for _, vs := range val {
-				for _, v := range vs {
-					msgs = append(msgs, v.(*model.UserFile))
-				}
-			}
-			kd, err = json.Marshal(msgs)
-			if err != nil {
-				logx.Errorf("Batcher.Do json.Marshal msgs: %v error: %v", msgs, err)
-			}
-			if err = l.svcCtx.KqPusherClient.Push(string(kd)); err != nil {
-				logx.Errorf("KafkaPusher.Push kd: %s error: %v", string(kd), err)
-			}
-		}
-	}
-	b.Start()
-
-	err = b.Add(strconv.FormatInt(key, 10), val)
-	if err != nil {
-		logx.Errorf("l.batcher.Add uid: %d error: %v", key, err)
-		return err
-	}
-	fmt.Println(232323232323, string(kd))
-	return err
-}
 func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWriter, r *http.Request) error {
 	// todo: add your logic here and delete this line
 	// 获取user_id
@@ -158,8 +134,9 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 	newFile.Seek(0, 0)
 	switch req.CurrentStoreType {
 	case int64(conf.StoreLocal):
-	case int64(conf.StoreMinio):
 		// 文件写入Minio存储
+	case int64(conf.StoreMinio):
+
 		//data, _ := io.ReadAll(newFile)
 		log.Println("开始写入minio")
 		minioPath := "minio/" + fileMeta.FileSha1
@@ -186,7 +163,7 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 	}
 	// 使用kafka对Mysql存储的文件元信息进行异步处理
 	userfile := model.UserFile{
-		UserId:     2,
+		UserId:     userId,
 		FileSha1:   fileMeta.FileSha1,
 		FileSize:   fileMeta.FileSize,
 		FileName:   fileMeta.FileName,
@@ -194,13 +171,9 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 		CreateTime: fileMeta.CreateTime,
 		UpdateTime: fileMeta.UpdateTime,
 	}
-	// kafka异步处理File元数据
-	err = l.StartBatcher(userId, &fileMeta)
-	if err != nil {
-		return errors.Wrapf(errorx.NewCodeError(40002, errorx.ErrKafkaFileMeta+err.Error()), "kafka异步fileMeta失败 err:%v", err)
-	}
-	// kafka异步处理UserFile元数据
-	err = l.StartBatcher(userId, &userfile)
+
+	// kafka异步处理UserFile元数据,Userfile只是多个userid，所以传他到Kafka
+	err = l.batcher.Add(strconv.FormatInt(userId, 10), &userfile)
 	if err != nil {
 		return errors.Wrapf(errorx.NewCodeError(40003, errorx.ErrKafkaUserFileMeta+err.Error()), "kafka异步UserFileMeta失败 err:%v", err)
 	}

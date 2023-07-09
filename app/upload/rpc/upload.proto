@@ -1,0 +1,26 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+package upload;
+
+option go_package = "./upload";
+
+message CommonResp{
+  int64 Code = 1;
+  string Message = 2;
+}
+
+message UploadFileReq{
+    int64 UserId=1;
+    string FileSha1=2;
+    int64 FileSize=3;
+    string FileName=4;
+    int64 Status=5;
+  google.protobuf.Timestamp CreateTime = 8;
+  google.protobuf.Timestamp UpdateTime = 9;
+  google.protobuf.Timestamp DeleteTime = 10;
+}
+
+service upload{
+  rpc UploadFile(UploadFileReq)returns(CommonResp);  // 上传文件
+
+}
