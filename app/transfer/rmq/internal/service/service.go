@@ -5,7 +5,6 @@ import (
 	"Gopan/app/upload/model"
 	"Gopan/common/init_db"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/gorm"
@@ -29,9 +28,11 @@ type Service struct {
 func NewService(c config.Config) *Service {
 	mysqlDb := init_db.InitGorm(c.MysqlCluster.DataSource)
 	mysqlDb.AutoMigrate(&model.NewUserFile{}, &model.File{})
+
 	s := &Service{
 		c:        c,
 		msgsChan: make([]chan *model.NewUserFile, chanCount),
+		MysqlDb:  mysqlDb,
 	}
 	for i := 0; i < chanCount; i++ {
 		ch := make(chan *model.NewUserFile, bufferCount)
@@ -47,21 +48,12 @@ func (s *Service) consume(ch chan *model.NewUserFile) {
 	defer s.waiter.Done()
 
 	for {
-		m, ok := <-ch
+		message, ok := <-ch
 		if !ok {
 			log.Fatal("seckill rmq exit")
 		}
+		m := *message
 		fmt.Printf("consume msg: %+v\n", m)
-		var file model.File
-		if err := s.MysqlDb.Model(&model.File{}).Where("file_sha1 = ?", m.FileSha1).First(&file).Error; err != nil {
-			if err == nil {
-				// 查到记录
-
-			} else if errors.Is(err, gorm.ErrRecordNotFound) {
-				// 发生其他错误
-			}
-		}
-
 		file := model.File{
 			FileSha1:   m.FileSha1,
 			FileName:   m.FileName,
@@ -70,12 +62,24 @@ func (s *Service) consume(ch chan *model.NewUserFile) {
 			Status:     m.Status,
 			CreateTime: m.CreateTime,
 			UpdateTime: m.UpdateTime,
-			DeleteTime: m.DeleteTime,
+		}
+		userfile := model.UserFile{
+			UserId:     m.UserId,
+			FileSha1:   m.FileSha1,
+			FileName:   m.FileName,
+			FileSize:   m.FileSize,
+			Status:     m.Status,
+			CreateTime: m.CreateTime,
+			UpdateTime: m.UpdateTime,
 		}
 
-		if err := s.MysqlDb.Create(&m).Error; err != nil {
+		if err := s.MysqlDb.Create(&file).Error; err != nil {
+			logx.Error(err)
 		}
-		//if err := s.MysqlDb.Create(&userfile).Error; err != nil {
+		if err := s.MysqlDb.Create(&userfile).Error; err != nil {
+			logx.Error(err)
+
+		}
 	}
 }
 

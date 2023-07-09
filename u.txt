@@ -1,7 +1,7 @@
 goctl model mysql ddl -src file.sql -dir . -c
 goctl api go -api transfer.api -dir .
 goctl rpc protoc upload.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
-go run upload.go -f etc/upload.yaml
+go run transfer.go -f etc/transfer.yaml
 
 goctl model mysql datasource -url="root:123456@tcp(127.0.0.1:3306)/gopan" -table="*"  -dir="./service/app/user/model"
 
