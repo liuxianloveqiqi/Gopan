@@ -1,8 +1,14 @@
 package main
 
 import (
+	"Gopan/common/errorx"
+	"Gopan/common/logs/zapx"
+	"context"
 	"flag"
 	"fmt"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/rest/httpx"
+	"net/http"
 
 	"Gopan/app/upload/rpc/internal/config"
 	"Gopan/app/upload/rpc/internal/server"
@@ -33,7 +39,18 @@ func main() {
 		}
 	})
 	defer s.Stop()
-
+	// 自定义错误
+	httpx.SetErrorHandlerCtx(func(ctx context.Context, err error) (int, interface{}) {
+		switch e := err.(type) {
+		case *errorx.CodeError:
+			return http.StatusOK, e.Data()
+		default:
+			return http.StatusInternalServerError, nil
+		}
+	})
+	writer, err := zapx.NewZapWriter()
+	logx.Must(err)
+	logx.SetWriter(writer)
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
 }

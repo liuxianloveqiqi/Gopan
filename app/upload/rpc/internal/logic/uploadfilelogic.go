@@ -35,8 +35,8 @@ func NewUploadFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upload
 	options := batcher.Options{
 		5,
 		100,
-		50,
-		10 * time.Second,
+		100,
+		1 * time.Second,
 	}
 	// 实现batcher
 	b := batcher.New(options)
@@ -45,10 +45,10 @@ func NewUploadFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upload
 		return int(pid) % options.Worker
 	}
 	b.Do = func(ctx context.Context, val map[string][]interface{}) {
-		var msgs []*model.UserFile
+		var msgs []*model.NewUserFile
 		for _, vs := range val {
 			for _, v := range vs {
-				msgs = append(msgs, v.(*model.UserFile))
+				msgs = append(msgs, v.(*model.NewUserFile))
 			}
 		}
 		kd, err := json.Marshal(msgs)
@@ -68,7 +68,7 @@ func NewUploadFileLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upload
 
 func (l *UploadFileLogic) UploadFile(in *upload.UploadFileReq) (*upload.CommonResp, error) {
 	// todo: add your logic here and delete this line
-	userfile := model.UserFile{
+	uf := model.UserFile{
 		Id:         0,
 		UserId:     in.UserId,
 		FileSha1:   in.FileSha1,
@@ -79,6 +79,7 @@ func (l *UploadFileLogic) UploadFile(in *upload.UploadFileReq) (*upload.CommonRe
 		DeleteTime: gorm.DeletedAt{Time: time.Unix(in.DeleteTime.GetSeconds(), 0)},
 		Status:     in.Status,
 	}
+	userfile := model.NewUserFile{UserFile: uf, FileAddr: in.FileAddr}
 	// kafka异步处理UserFile元数据,Userfile只是多个userid，所以传他到Kafka
 	err := l.batcher.Add(strconv.FormatInt(in.UserId, 10), &userfile)
 	if err != nil {

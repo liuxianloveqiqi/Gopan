@@ -4,31 +4,30 @@ import (
 	"Gopan/app/upload/api/internal/svc"
 	"Gopan/app/upload/api/internal/types"
 	"Gopan/app/upload/model"
-	"Gopan/common/batcher"
+	"Gopan/app/upload/rpc/types/upload"
 	"Gopan/common/conf"
 	"Gopan/common/errorx"
 	"Gopan/common/utils"
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/protobuf/types/known/timestamppb"
+	"gorm.io/gorm"
 	"io"
 	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 )
 
 type FileUploadLogic struct {
 	logx.Logger
-	ctx     context.Context
-	svcCtx  *svc.ServiceContext
-	batcher *batcher.Batcher
+	ctx    context.Context
+	svcCtx *svc.ServiceContext
 }
 
 func NewFileUploadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileUploadLogic {
@@ -37,37 +36,6 @@ func NewFileUploadLogic(ctx context.Context, svcCtx *svc.ServiceContext) *FileUp
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
-	// batcher配置
-	options := batcher.Options{
-		5,
-		100,
-		50,
-		10 * time.Second,
-	}
-	// 实现batcher
-	b := batcher.New(options)
-	b.Sharding = func(key string) int {
-		pid, _ := strconv.ParseInt(key, 10, 64)
-		return int(pid) % options.Worker
-	}
-	b.Do = func(ctx context.Context, val map[string][]interface{}) {
-		var msgs []*model.UserFile
-		for _, vs := range val {
-			for _, v := range vs {
-				msgs = append(msgs, v.(*model.UserFile))
-			}
-		}
-		kd, err := json.Marshal(msgs)
-		if err != nil {
-			logx.Errorf("Batcher.Do json.Marshal msgs: %v error: %v", msgs, err)
-		}
-		if err = f.svcCtx.KqPusherClient.Push(string(kd)); err != nil {
-			logx.Errorf("KafkaPusher.Push kd: %s error: %v", string(kd), err)
-		}
-	}
-	f.batcher = b
-	f.batcher.Start()
-
 	return f
 }
 
@@ -86,6 +54,7 @@ func (l *FileUploadLogic) COSUpload(filePath string, file *multipart.FileHeader)
 func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWriter, r *http.Request) error {
 	// todo: add your logic here and delete this line
 	// 获取user_id
+	var err error
 	userId, ok := l.ctx.Value("user_id").(int64)
 	if !ok {
 		return errors.Wrapf(errorx.NewDefaultError("user_id获取失败"), "user_id获取失败 user_id:%v", userId)
@@ -132,51 +101,94 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 	fileMeta.FileSha1 = utils.FileSha1(newFile)
 	// 偏移量重置
 	newFile.Seek(0, 0)
-	switch req.CurrentStoreType {
-	case int64(conf.StoreLocal):
-		// 文件写入Minio存储
-	case int64(conf.StoreMinio):
-
-		//data, _ := io.ReadAll(newFile)
-		log.Println("开始写入minio")
-		minioPath := "minio/" + fileMeta.FileSha1
-		bucketName := "userfile"
-		// 上传文件到 MinIO
-		_, err = l.svcCtx.MinioDb.PutObject(context.TODO(), bucketName, fileMeta.FileName, newFile, -1, minio.PutObjectOptions{})
-		if err != nil {
-			log.Println(err)
-			return errors.Wrapf(errorx.NewDefaultError("上传文件失败 err:"+err.Error()), "上传文件到minio错误 err : %v", err)
+	oldfile := model.File{}
+	if err = l.svcCtx.MysqlDb.Model(&model.File{}).Where("file_sha1 = ?", fileMeta.FileSha1).First(&oldfile).Error; err == nil {
+		// file查到记录,触发秒传，直接写入userfile
+		fmt.Println("触发秒传")
+		newUserFile := model.UserFile{
+			UserId:     userId,
+			FileSha1:   oldfile.FileSha1,
+			FileSize:   oldfile.FileSize,
+			FileName:   oldfile.FileName,
+			CreateTime: time.Now(),
+			UpdateTime: time.Now(),
+			Status:     oldfile.Status,
 		}
-		fileMeta.FileAddr = minioPath
+		// 判断用户是不是重新上传文件
+		if err = l.svcCtx.MysqlDb.Model(&model.UserFile{}).Where("file_sha1 = ? and user_id = ?", fileMeta.FileSha1, userId).First(&model.UserFile{}).Error; err != gorm.ErrRecordNotFound {
+			fmt.Println("用户重复上传文件")
+			err = errors.Wrapf(errorx.NewDefaultError("用户重复上传文件"), "userid:%v 用户重复上传文件", userId)
 
-	case int64(conf.StoreCOS):
-		// 写入COS
-		log.Println("开始写入cos")
-		cosPath := "cos/" + fileMeta.FileSha1
-		// 写入COS
-		err = l.COSUpload(cosPath, head)
-		if err != nil {
-			return errors.Wrapf(errorx.NewDefaultError("上传文件失败 err:"+err.Error()), "上传文件到COS错误 err:%v", err)
+		} else {
+			err = l.svcCtx.MysqlDb.Create(&newUserFile).Error
+			if err != nil {
+				err = errors.Wrapf(errorx.NewDefaultError(err.Error()), "秒传写入userfile表失败 err:%v", err)
+			}
 		}
-		fileMeta.FileAddr = cosPath
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+		// 新文件开始存储
+		switch req.CurrentStoreType {
+		case int64(conf.StoreLocal):
+			// 文件写入Minio存储
+		case int64(conf.StoreMinio):
 
-	}
-	// 使用kafka对Mysql存储的文件元信息进行异步处理
-	userfile := model.UserFile{
-		UserId:     userId,
-		FileSha1:   fileMeta.FileSha1,
-		FileSize:   fileMeta.FileSize,
-		FileName:   fileMeta.FileName,
-		Status:     fileMeta.Status,
-		CreateTime: fileMeta.CreateTime,
-		UpdateTime: fileMeta.UpdateTime,
+			//data, _ := io.ReadAll(newFile)
+			log.Println("开始写入minio")
+			minioPath := "minio/" + fileMeta.FileSha1
+			bucketName := "userfile"
+			// 上传文件到 MinIO
+			_, err = l.svcCtx.MinioDb.PutObject(context.TODO(), bucketName, fileMeta.FileName, newFile, -1, minio.PutObjectOptions{})
+			if err != nil {
+				log.Println(err)
+				err = errors.Wrapf(errorx.NewDefaultError("上传文件失败 err:"+err.Error()), "上传文件到minio错误 err : %v", err)
+			}
+			fileMeta.FileAddr = minioPath
+
+		case int64(conf.StoreCOS):
+			// 写入COS
+			log.Println("开始写入cos")
+			cosPath := "cos/" + fileMeta.FileSha1
+			// 写入COS
+			err = l.COSUpload(cosPath, head)
+			if err != nil {
+				err = errors.Wrapf(errorx.NewDefaultError("上传文件失败 err:"+err.Error()), "上传文件到COS错误 err:%v", err)
+			}
+			fileMeta.FileAddr = cosPath
+		}
+		// 使用kafka对Mysql存储的文件元信息进行异步处理
+		userfile := model.UserFile{
+			UserId:     userId,
+			FileSha1:   fileMeta.FileSha1,
+			FileSize:   fileMeta.FileSize,
+			FileName:   fileMeta.FileName,
+			Status:     fileMeta.Status,
+			CreateTime: fileMeta.CreateTime,
+			UpdateTime: fileMeta.UpdateTime,
+		}
+		_, err = l.svcCtx.Rpc.UploadFile(l.ctx, &upload.UploadFileReq{
+			UserId:     userfile.UserId,
+			FileSha1:   userfile.FileSha1,
+			FileSize:   userfile.FileSize,
+			FileName:   userfile.FileName,
+			FileAddr:   fileMeta.FileAddr,
+			CreateTime: timestamppb.New(userfile.CreateTime),
+			UpdateTime: timestamppb.New(userfile.UpdateTime),
+			DeleteTime: timestamppb.New(userfile.DeleteTime.Time),
+			Status:     userfile.Status,
+		})
+		if err != nil {
+			err = errors.Wrapf(err, "req: %+v", req)
+		}
+
+	} else {
+		err = errors.Wrapf(errorx.NewDefaultError("查询数据库错误 err:"+err.Error()), "查询userfile 发生err:%v", err)
 	}
 
 	// kafka异步处理UserFile元数据,Userfile只是多个userid，所以传他到Kafka
-	err = l.batcher.Add(strconv.FormatInt(userId, 10), &userfile)
-	if err != nil {
-		return errors.Wrapf(errorx.NewCodeError(40003, errorx.ErrKafkaUserFileMeta+err.Error()), "kafka异步UserFileMeta失败 err:%v", err)
-	}
+	//err = l.batcher.Add(strconv.FormatInt(userId, 10), &userfile)
+	//if err != nil {
+	//	return errors.Wrapf(errorx.NewCodeError(40003, errorx.ErrKafkaUserFileMeta+err.Error()), "kafka异步UserFileMeta失败 err:%v", err)
+	//}
 	//if err = l.svcCtx.MysqlDb.Create(&fileMeta).Error; err != nil {
 	//	return errors.Wrapf(errorx.NewCodeError(20002, errorx.ErrFileCreat+err.Error()), "file表Creat错误 err:%v\", err")
 	//}
@@ -184,5 +196,5 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 	//if err = l.svcCtx.MysqlDb.Create(&userfile).Error; err != nil {
 	//	return errors.Wrapf(errorx.NewCodeError(20003, errorx.ErrFileCreat+err.Error()), "userfile表Creat错误 err:%v\", err")
 	//}
-	return nil
+	return err
 }

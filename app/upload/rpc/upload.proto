@@ -14,7 +14,8 @@ message UploadFileReq{
     string FileSha1=2;
     int64 FileSize=3;
     string FileName=4;
-    int64 Status=5;
+    string FileAddr=5;
+    int64 Status=6;
   google.protobuf.Timestamp CreateTime = 8;
   google.protobuf.Timestamp UpdateTime = 9;
   google.protobuf.Timestamp DeleteTime = 10;

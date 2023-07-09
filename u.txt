@@ -1,7 +1,7 @@
 goctl model mysql ddl -src file.sql -dir . -c
-goctl api go -api upload.api -dir .
+goctl api go -api transfer.api -dir .
 goctl rpc protoc upload.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
-go run upload.go -f etc/upload-api.yaml
+go run upload.go -f etc/upload.yaml
 
 goctl model mysql datasource -url="root:123456@tcp(127.0.0.1:3306)/gopan" -table="*"  -dir="./service/app/user/model"
 
@@ -46,3 +46,5 @@ docker run -it --privileged --pid=host justincormack/nsenter1
     	UpdateTime time.Time     `gorm:"column:update_time" db:"update_time"`
     	DeleteTime sql.NullTime  `gorm:"column:delete_time" db:"delete_time"`
     }
+
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic gopan-upload --group gopan-upload-consume

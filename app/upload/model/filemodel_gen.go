@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"gorm.io/gorm"
 	"strings"
 	"time"
 
@@ -41,15 +42,15 @@ type (
 	}
 
 	File struct {
-		Id         int64        `db:"id"`
-		FileSha1   string       `db:"file_sha1"` // 文件hash
-		FileName   string       `db:"file_name"` // 文件名
-		FileSize   int64        `db:"file_size"` // 文件大小
-		FileAddr   string       `db:"file_addr"` // 文件存储位置
-		Status     int64        `db:"status"`    // 状态(可用/禁用/已删除等状态)
-		CreateTime time.Time    `db:"create_time"`
-		UpdateTime time.Time    `db:"update_time"`
-		DeleteTime sql.NullTime `db:"delete_time"`
+		Id         int64          `gorm:"column:id;primaryKey" db:"id"`
+		FileSha1   string         `gorm:"column:file_sha1" db:"file_sha1"`
+		FileName   string         `gorm:"column:file_name" db:"file_name"`
+		FileSize   int64          `gorm:"column:file_size" db:"file_size"`
+		FileAddr   string         `gorm:"column:file_addr" db:"file_addr"`
+		Status     int64          `gorm:"column:status" db:"status"`
+		CreateTime time.Time      `gorm:"column:create_time" db:"create_time"`
+		UpdateTime time.Time      `gorm:"column:update_time" db:"update_time"`
+		DeleteTime gorm.DeletedAt `gorm:"column:delete_time" db:"delete_time"`
 	}
 )
 
