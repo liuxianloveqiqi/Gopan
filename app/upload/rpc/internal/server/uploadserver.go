@@ -36,3 +36,8 @@ func (s *UploadServer) InitialMultipartUpload(ctx context.Context, in *upload.In
 	l := logic.NewInitialMultipartUploadLogic(ctx, s.svcCtx)
 	return l.InitialMultipartUpload(in)
 }
+
+func (s *UploadServer) UploadPart(ctx context.Context, in *upload.UploadFileReq) (*upload.CommonResp, error) {
+	l := logic.NewUploadPartLogic(ctx, s.svcCtx)
+	return l.UploadPart(in)
+}

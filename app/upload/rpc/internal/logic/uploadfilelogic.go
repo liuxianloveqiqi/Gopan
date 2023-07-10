@@ -80,7 +80,7 @@ func (l *UploadFileLogic) UploadFile(in *upload.UploadFileReq) (*upload.CommonRe
 		Status:     in.Status,
 	}
 	userfile := model.NewUserFile{UserFile: uf, FileAddr: in.FileAddr}
-	// kafka异步处理UserFile元数据,Userfile只是多个userid，所以传他到Kafka
+	// kafka异步处理file元数据
 	err := l.batcher.Add(strconv.FormatInt(in.UserId, 10), &userfile)
 	if err != nil {
 		return nil, errors.Wrapf(errorx.NewCodeError(40003, errorx.ErrKafkaUserFileMeta+err.Error()), "kafka异步UserFileMeta失败 err:%v", err)

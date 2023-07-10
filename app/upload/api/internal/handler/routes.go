@@ -29,6 +29,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Path:    "/multipartupload/init",
 					Handler: initialMultipartUploadHandler(serverCtx),
 				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/multipartupload/uploadpart",
+					Handler: uploadPartReqHandler(serverCtx),
+				},
 			}...,
 		),
 		rest.WithPrefix("/file"),

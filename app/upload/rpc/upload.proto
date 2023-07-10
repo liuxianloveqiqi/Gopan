@@ -11,12 +11,12 @@ message CommonResp{
 
 // 普通上传文件
 message UploadFileReq{
-    int64 UserId=1;
-    string FileSha1=2;
-    int64 FileSize=3;
-    string FileName=4;
-    string FileAddr=5;
-    int64 Status=6;
+  int64 UserId = 1;
+  string FileSha1 = 2;
+  int64 FileSize = 3;
+  string FileName = 4;
+  string FileAddr = 5;
+  int64 Status = 6;
   google.protobuf.Timestamp CreateTime = 8;
   google.protobuf.Timestamp UpdateTime = 9;
   google.protobuf.Timestamp DeleteTime = 10;
@@ -24,16 +24,15 @@ message UploadFileReq{
 
 // 秒传文件
 message FastUploadFileReq{
-  int64 UserId=1;
-  string FileSha1=2;
+  int64 UserId = 1;
+  string FileSha1 = 2;
 }
 
 // 初始化分快上传
 message InitialMultipartUploadReq {
   string FileSha1 = 1;
   int64 FileSize = 2;
-  int64 UserId=3;
-
+  int64 UserId = 3;
 }
 
 message InitialMultipartUploadResp {
@@ -42,11 +41,19 @@ message InitialMultipartUploadResp {
   string UploadID = 3;
   int64 ChunkSize = 4;
   int64 ChunkCount = 5;
-  int64 UserId=6;
+  int64 UserId = 6;
+
+}
+
+// 上传分块文件
+message UploadPartReq{
+  string UploadID = 1;
+ int64  ChunkIndex=2;
 
 }
 service upload{
   rpc UploadFile(UploadFileReq)returns(CommonResp);  // 上传文件
   rpc FastUploadFile(FastUploadFileReq)returns(CommonResp); // 秒传
   rpc InitialMultipartUpload(InitialMultipartUploadReq) returns(InitialMultipartUploadResp); // 初始化分快上传
+  rpc UploadPart(UploadFileReq) returns(CommonResp); // 上传分块文件
 }

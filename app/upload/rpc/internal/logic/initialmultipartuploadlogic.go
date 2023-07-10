@@ -45,11 +45,11 @@ func (l *InitialMultipartUploadLogic) InitialMultipartUpload(in *upload.InitialM
 	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart"+upInfo.UploadID, "filesha1", upInfo.FileSha1).Err(); err != nil {
 		return nil, errors.Wrapf(errorx.NewDefaultError("redis写入错误"), "redis写入错误 err:%v", err)
 	}
-	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart"+upInfo.UploadID, "filesize", upInfo.FileSize); err != nil {
+	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart"+upInfo.UploadID, "filesize", upInfo.FileSize).Err(); err != nil {
 		return nil, errors.Wrapf(errorx.NewDefaultError("redis写入错误"), "redis写入错误 err:%v", err)
 
 	}
-	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart"+upInfo.UploadID, "chunkcount", upInfo.ChunkCount); err != nil {
+	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart"+upInfo.UploadID, "chunkcount", upInfo.ChunkCount).Err(); err != nil {
 		return nil, errors.Wrapf(errorx.NewDefaultError("redis写入错误"), "redis写入错误 err:%v", err)
 
 	}

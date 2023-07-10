@@ -140,6 +140,7 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 		CreateTime: fileMeta.CreateTime,
 		UpdateTime: fileMeta.UpdateTime,
 	}
+	// 调用rpc
 	_, err = l.svcCtx.Rpc.UploadFile(l.ctx, &upload.UploadFileReq{
 		UserId:     userfile.UserId,
 		FileSha1:   userfile.FileSha1,
@@ -155,17 +156,5 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 		return errors.Wrapf(err, "req: %+v", req)
 	}
 
-	// kafka异步处理UserFile元数据,Userfile只是多个userid，所以传他到Kafka
-	//err = l.batcher.Add(strconv.FormatInt(userId, 10), &userfile)
-	//if err != nil {
-	//	return errors.Wrapf(errorx.NewCodeError(40003, errorx.ErrKafkaUserFileMeta+err.Error()), "kafka异步UserFileMeta失败 err:%v", err)
-	//}
-	//if err = l.svcCtx.MysqlDb.Create(&fileMeta).Error; err != nil {
-	//	return errors.Wrapf(errorx.NewCodeError(20002, errorx.ErrFileCreat+err.Error()), "file表Creat错误 err:%v\", err")
-	//}
-	//
-	//if err = l.svcCtx.MysqlDb.Create(&userfile).Error; err != nil {
-	//	return errors.Wrapf(errorx.NewCodeError(20003, errorx.ErrFileCreat+err.Error()), "userfile表Creat错误 err:%v\", err")
-	//}
 	return nil
 }

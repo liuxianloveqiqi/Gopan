@@ -15,10 +15,15 @@ type InitialMultipartUploadReq struct {
 }
 
 type InitialMultipartUploadResp struct {
+	UserId     int64  `json:"userId"`
 	FileSha1   string `json:"fileSha1"`
 	FileSize   int64  `json:"fileSize"`
 	UploadID   string `json:"uploadId"`
 	ChunkSize  int64  `json:"chunkSize"`
 	ChunkCount int64  `json:"chunkCount"`
-	UserID     int64  `json:"userID"`
+}
+
+type UploadPartReq struct {
+	UploadID   string `json:"uploadId"`
+	ChunkIndex int64  `json:"chunkIndex"`
 }
