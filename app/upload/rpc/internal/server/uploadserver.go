@@ -26,3 +26,13 @@ func (s *UploadServer) UploadFile(ctx context.Context, in *upload.UploadFileReq)
 	l := logic.NewUploadFileLogic(ctx, s.svcCtx)
 	return l.UploadFile(in)
 }
+
+func (s *UploadServer) FastUploadFile(ctx context.Context, in *upload.FastUploadFileReq) (*upload.CommonResp, error) {
+	l := logic.NewFastUploadFileLogic(ctx, s.svcCtx)
+	return l.FastUploadFile(in)
+}
+
+func (s *UploadServer) InitialMultipartUpload(ctx context.Context, in *upload.InitialMultipartUploadReq) (*upload.InitialMultipartUploadResp, error) {
+	l := logic.NewInitialMultipartUploadLogic(ctx, s.svcCtx)
+	return l.InitialMultipartUpload(in)
+}

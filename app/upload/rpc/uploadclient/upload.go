@@ -13,11 +13,16 @@ import (
 )
 
 type (
-	CommonResp    = upload.CommonResp
-	UploadFileReq = upload.UploadFileReq
+	CommonResp                 = upload.CommonResp
+	FastUploadFileReq          = upload.FastUploadFileReq
+	InitialMultipartUploadReq  = upload.InitialMultipartUploadReq
+	InitialMultipartUploadResp = upload.InitialMultipartUploadResp
+	UploadFileReq              = upload.UploadFileReq
 
 	Upload interface {
 		UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*CommonResp, error)
+		FastUploadFile(ctx context.Context, in *FastUploadFileReq, opts ...grpc.CallOption) (*CommonResp, error)
+		InitialMultipartUpload(ctx context.Context, in *InitialMultipartUploadReq, opts ...grpc.CallOption) (*InitialMultipartUploadResp, error)
 	}
 
 	defaultUpload struct {
@@ -34,4 +39,14 @@ func NewUpload(cli zrpc.Client) Upload {
 func (m *defaultUpload) UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*CommonResp, error) {
 	client := upload.NewUploadClient(m.cli.Conn())
 	return client.UploadFile(ctx, in, opts...)
+}
+
+func (m *defaultUpload) FastUploadFile(ctx context.Context, in *FastUploadFileReq, opts ...grpc.CallOption) (*CommonResp, error) {
+	client := upload.NewUploadClient(m.cli.Conn())
+	return client.FastUploadFile(ctx, in, opts...)
+}
+
+func (m *defaultUpload) InitialMultipartUpload(ctx context.Context, in *InitialMultipartUploadReq, opts ...grpc.CallOption) (*InitialMultipartUploadResp, error) {
+	client := upload.NewUploadClient(m.cli.Conn())
+	return client.InitialMultipartUpload(ctx, in, opts...)
 }

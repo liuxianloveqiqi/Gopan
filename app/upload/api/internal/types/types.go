@@ -4,3 +4,21 @@ package types
 type FileUploadReq struct {
 	CurrentStoreType int64 `form:"currentStoreType" validate:"required,in=1|2|3|4|5"`
 }
+
+type TryFastUploadReq struct {
+	FileSha1 string `json:"fileSha1"`
+}
+
+type InitialMultipartUploadReq struct {
+	FileSha1 string `json:"fileSha1"`
+	FileSize int64  `json:"fileSize"`
+}
+
+type InitialMultipartUploadResp struct {
+	FileSha1   string `json:"fileSha1"`
+	FileSize   int64  `json:"fileSize"`
+	UploadID   string `json:"uploadId"`
+	ChunkSize  int64  `json:"chunkSize"`
+	ChunkCount int64  `json:"chunkCount"`
+	UserID     int64  `json:"userID"`
+}

@@ -9,6 +9,7 @@ message CommonResp{
   string Message = 2;
 }
 
+// 普通上传文件
 message UploadFileReq{
     int64 UserId=1;
     string FileSha1=2;
@@ -21,7 +22,31 @@ message UploadFileReq{
   google.protobuf.Timestamp DeleteTime = 10;
 }
 
+// 秒传文件
+message FastUploadFileReq{
+  int64 UserId=1;
+  string FileSha1=2;
+}
+
+// 初始化分快上传
+message InitialMultipartUploadReq {
+  string FileSha1 = 1;
+  int64 FileSize = 2;
+  int64 UserId=3;
+
+}
+
+message InitialMultipartUploadResp {
+  string FileSha1 = 1;
+  int64 FileSize = 2;
+  string UploadID = 3;
+  int64 ChunkSize = 4;
+  int64 ChunkCount = 5;
+  int64 UserId=6;
+
+}
 service upload{
   rpc UploadFile(UploadFileReq)returns(CommonResp);  // 上传文件
-
+  rpc FastUploadFile(FastUploadFileReq)returns(CommonResp); // 秒传
+  rpc InitialMultipartUpload(InitialMultipartUploadReq) returns(InitialMultipartUploadResp); // 初始化分快上传
 }

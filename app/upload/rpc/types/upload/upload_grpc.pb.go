@@ -19,7 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Upload_UploadFile_FullMethodName = "/upload.upload/UploadFile"
+	Upload_UploadFile_FullMethodName             = "/upload.upload/UploadFile"
+	Upload_FastUploadFile_FullMethodName         = "/upload.upload/FastUploadFile"
+	Upload_InitialMultipartUpload_FullMethodName = "/upload.upload/InitialMultipartUpload"
 )
 
 // UploadClient is the client API for Upload service.
@@ -27,6 +29,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UploadClient interface {
 	UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*CommonResp, error)
+	FastUploadFile(ctx context.Context, in *FastUploadFileReq, opts ...grpc.CallOption) (*CommonResp, error)
+	InitialMultipartUpload(ctx context.Context, in *InitialMultipartUploadReq, opts ...grpc.CallOption) (*InitialMultipartUploadResp, error)
 }
 
 type uploadClient struct {
@@ -46,11 +50,31 @@ func (c *uploadClient) UploadFile(ctx context.Context, in *UploadFileReq, opts .
 	return out, nil
 }
 
+func (c *uploadClient) FastUploadFile(ctx context.Context, in *FastUploadFileReq, opts ...grpc.CallOption) (*CommonResp, error) {
+	out := new(CommonResp)
+	err := c.cc.Invoke(ctx, Upload_FastUploadFile_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *uploadClient) InitialMultipartUpload(ctx context.Context, in *InitialMultipartUploadReq, opts ...grpc.CallOption) (*InitialMultipartUploadResp, error) {
+	out := new(InitialMultipartUploadResp)
+	err := c.cc.Invoke(ctx, Upload_InitialMultipartUpload_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UploadServer is the server API for Upload service.
 // All implementations must embed UnimplementedUploadServer
 // for forward compatibility
 type UploadServer interface {
 	UploadFile(context.Context, *UploadFileReq) (*CommonResp, error)
+	FastUploadFile(context.Context, *FastUploadFileReq) (*CommonResp, error)
+	InitialMultipartUpload(context.Context, *InitialMultipartUploadReq) (*InitialMultipartUploadResp, error)
 	mustEmbedUnimplementedUploadServer()
 }
 
@@ -60,6 +84,12 @@ type UnimplementedUploadServer struct {
 
 func (UnimplementedUploadServer) UploadFile(context.Context, *UploadFileReq) (*CommonResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UploadFile not implemented")
+}
+func (UnimplementedUploadServer) FastUploadFile(context.Context, *FastUploadFileReq) (*CommonResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FastUploadFile not implemented")
+}
+func (UnimplementedUploadServer) InitialMultipartUpload(context.Context, *InitialMultipartUploadReq) (*InitialMultipartUploadResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitialMultipartUpload not implemented")
 }
 func (UnimplementedUploadServer) mustEmbedUnimplementedUploadServer() {}
 
@@ -92,6 +122,42 @@ func _Upload_UploadFile_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Upload_FastUploadFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FastUploadFileReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UploadServer).FastUploadFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Upload_FastUploadFile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UploadServer).FastUploadFile(ctx, req.(*FastUploadFileReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Upload_InitialMultipartUpload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitialMultipartUploadReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UploadServer).InitialMultipartUpload(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Upload_InitialMultipartUpload_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UploadServer).InitialMultipartUpload(ctx, req.(*InitialMultipartUploadReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Upload_ServiceDesc is the grpc.ServiceDesc for Upload service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -102,6 +168,14 @@ var Upload_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UploadFile",
 			Handler:    _Upload_UploadFile_Handler,
+		},
+		{
+			MethodName: "FastUploadFile",
+			Handler:    _Upload_FastUploadFile_Handler,
+		},
+		{
+			MethodName: "InitialMultipartUpload",
+			Handler:    _Upload_InitialMultipartUpload_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

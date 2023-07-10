@@ -3,6 +3,7 @@ package main
 import (
 	"Gopan/common/errorx"
 	"Gopan/common/logs/zapx"
+	"Gopan/common/response/rpcserver"
 	"context"
 	"flag"
 	"fmt"
@@ -39,6 +40,8 @@ func main() {
 		}
 	})
 	defer s.Stop()
+	// 添加rpc 错误返回
+	s.AddUnaryInterceptors(rpcserver.LoggerInterceptor)
 	// 自定义错误
 	httpx.SetErrorHandlerCtx(func(ctx context.Context, err error) (int, interface{}) {
 		switch e := err.(type) {
