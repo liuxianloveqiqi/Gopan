@@ -42,14 +42,14 @@ func (l *InitialMultipartUploadLogic) InitialMultipartUpload(in *upload.InitialM
 		ChunkCount: int(math.Ceil(float64(in.FileSize) / (10 * 1024 * 1024))),
 	}
 	// 将分块的信息写入redis
-	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart"+upInfo.UploadID, "filesha1", upInfo.FileSha1).Err(); err != nil {
+	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart_"+upInfo.UploadID, "filesha1_", upInfo.FileSha1).Err(); err != nil {
 		return nil, errors.Wrapf(errorx.NewDefaultError("redis写入错误"), "redis写入错误 err:%v", err)
 	}
-	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart"+upInfo.UploadID, "filesize", upInfo.FileSize).Err(); err != nil {
+	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart_"+upInfo.UploadID, "filesize_", upInfo.FileSize).Err(); err != nil {
 		return nil, errors.Wrapf(errorx.NewDefaultError("redis写入错误"), "redis写入错误 err:%v", err)
 
 	}
-	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart"+upInfo.UploadID, "chunkcount", upInfo.ChunkCount).Err(); err != nil {
+	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart_"+upInfo.UploadID, "chunkcount_", upInfo.ChunkCount).Err(); err != nil {
 		return nil, errors.Wrapf(errorx.NewDefaultError("redis写入错误"), "redis写入错误 err:%v", err)
 
 	}

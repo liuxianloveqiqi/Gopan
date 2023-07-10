@@ -1,10 +1,11 @@
 package logic
 
 import (
-	"context"
-
 	"Gopan/app/upload/rpc/internal/svc"
 	"Gopan/app/upload/rpc/types/upload"
+	"Gopan/common/errorx"
+	"context"
+	"github.com/pkg/errors"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -23,8 +24,11 @@ func NewUploadPartLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upload
 	}
 }
 
-func (l *UploadPartLogic) UploadPart(in *upload.UploadFileReq) (*upload.CommonResp, error) {
+func (l *UploadPartLogic) UploadPart(in *upload.UploadPartReq) (*upload.CommonResp, error) {
 	// todo: add your logic here and delete this line
-
+	// 将hset置为1表示已经完成该分块的上传
+	if err := l.svcCtx.Rdb.HSet(l.ctx, "multipart"+in.UploadID, "checkindex", 1).Err(); err != nil {
+		return nil, errors.Wrapf(errorx.NewDefaultError("redis分块上传check错误"), "redis分块上传check错误 err:%v", err)
+	}
 	return &upload.CommonResp{}, nil
 }

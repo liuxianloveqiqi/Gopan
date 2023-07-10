@@ -46,6 +46,6 @@ func (l *InitialMultipartUploadLogic) InitialMultipartUpload(req *types.InitialM
 		UploadID:   cnt.UploadID,
 		ChunkSize:  cnt.ChunkSize,
 		ChunkCount: cnt.ChunkCount,
-		UserID:     cnt.UserId,
+		UserId:     cnt.UserId,
 	}, nil
 }

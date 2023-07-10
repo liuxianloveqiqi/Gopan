@@ -20,7 +20,6 @@ var configFile = flag.String("f", "etc/transfer.yaml", "the etc file")
 
 func main() {
 	flag.Parse()
-
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 

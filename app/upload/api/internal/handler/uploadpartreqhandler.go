@@ -4,6 +4,8 @@ import (
 	"Gopan/app/upload/api/internal/logic"
 	"Gopan/app/upload/api/internal/svc"
 	"Gopan/app/upload/api/internal/types"
+	"Gopan/common/response"
+	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"
 )
 
@@ -16,8 +18,8 @@ func uploadPartReqHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 
 		l := logic.NewUploadPartReqLogic(r.Context(), svcCtx)
-		err := l.UploadPartReq(&req)
-		response.Response(w, nil, err) //②
+		err := l.UploadPartReq(&req, w, r)
+		response.Response(r, w, nil, err) //②
 
 	}
 }

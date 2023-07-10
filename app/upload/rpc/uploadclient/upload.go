@@ -24,7 +24,7 @@ type (
 		UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*CommonResp, error)
 		FastUploadFile(ctx context.Context, in *FastUploadFileReq, opts ...grpc.CallOption) (*CommonResp, error)
 		InitialMultipartUpload(ctx context.Context, in *InitialMultipartUploadReq, opts ...grpc.CallOption) (*InitialMultipartUploadResp, error)
-		UploadPart(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*CommonResp, error)
+		UploadPart(ctx context.Context, in *UploadPartReq, opts ...grpc.CallOption) (*CommonResp, error)
 	}
 
 	defaultUpload struct {
@@ -53,7 +53,7 @@ func (m *defaultUpload) InitialMultipartUpload(ctx context.Context, in *InitialM
 	return client.InitialMultipartUpload(ctx, in, opts...)
 }
 
-func (m *defaultUpload) UploadPart(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*CommonResp, error) {
+func (m *defaultUpload) UploadPart(ctx context.Context, in *UploadPartReq, opts ...grpc.CallOption) (*CommonResp, error) {
 	client := upload.NewUploadClient(m.cli.Conn())
 	return client.UploadPart(ctx, in, opts...)
 }

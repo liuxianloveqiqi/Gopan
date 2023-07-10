@@ -34,6 +34,14 @@ type (
 		UploadID   string `json:"uploadId"`
 		ChunkIndex int64  `json:"chunkIndex"`
 	}
+
+   // 合并分块的文件
+	CompleteUpload{
+		FileSha1   string `json:"fileSha1"`
+		FileSize   int64  `json:"fileSize"`
+		UploadID   string `json:"uploadId"`
+		ChunkSize  int64  `json:"chunkSize"`
+	}
 )
 
 @server(

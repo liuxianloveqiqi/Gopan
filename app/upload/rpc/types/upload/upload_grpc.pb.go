@@ -32,7 +32,7 @@ type UploadClient interface {
 	UploadFile(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*CommonResp, error)
 	FastUploadFile(ctx context.Context, in *FastUploadFileReq, opts ...grpc.CallOption) (*CommonResp, error)
 	InitialMultipartUpload(ctx context.Context, in *InitialMultipartUploadReq, opts ...grpc.CallOption) (*InitialMultipartUploadResp, error)
-	UploadPart(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*CommonResp, error)
+	UploadPart(ctx context.Context, in *UploadPartReq, opts ...grpc.CallOption) (*CommonResp, error)
 }
 
 type uploadClient struct {
@@ -70,7 +70,7 @@ func (c *uploadClient) InitialMultipartUpload(ctx context.Context, in *InitialMu
 	return out, nil
 }
 
-func (c *uploadClient) UploadPart(ctx context.Context, in *UploadFileReq, opts ...grpc.CallOption) (*CommonResp, error) {
+func (c *uploadClient) UploadPart(ctx context.Context, in *UploadPartReq, opts ...grpc.CallOption) (*CommonResp, error) {
 	out := new(CommonResp)
 	err := c.cc.Invoke(ctx, Upload_UploadPart_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -86,7 +86,7 @@ type UploadServer interface {
 	UploadFile(context.Context, *UploadFileReq) (*CommonResp, error)
 	FastUploadFile(context.Context, *FastUploadFileReq) (*CommonResp, error)
 	InitialMultipartUpload(context.Context, *InitialMultipartUploadReq) (*InitialMultipartUploadResp, error)
-	UploadPart(context.Context, *UploadFileReq) (*CommonResp, error)
+	UploadPart(context.Context, *UploadPartReq) (*CommonResp, error)
 	mustEmbedUnimplementedUploadServer()
 }
 
@@ -103,7 +103,7 @@ func (UnimplementedUploadServer) FastUploadFile(context.Context, *FastUploadFile
 func (UnimplementedUploadServer) InitialMultipartUpload(context.Context, *InitialMultipartUploadReq) (*InitialMultipartUploadResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitialMultipartUpload not implemented")
 }
-func (UnimplementedUploadServer) UploadPart(context.Context, *UploadFileReq) (*CommonResp, error) {
+func (UnimplementedUploadServer) UploadPart(context.Context, *UploadPartReq) (*CommonResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UploadPart not implemented")
 }
 func (UnimplementedUploadServer) mustEmbedUnimplementedUploadServer() {}
@@ -174,7 +174,7 @@ func _Upload_InitialMultipartUpload_Handler(srv interface{}, ctx context.Context
 }
 
 func _Upload_UploadPart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UploadFileReq)
+	in := new(UploadPartReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -186,7 +186,7 @@ func _Upload_UploadPart_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: Upload_UploadPart_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UploadServer).UploadPart(ctx, req.(*UploadFileReq))
+		return srv.(UploadServer).UploadPart(ctx, req.(*UploadPartReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }

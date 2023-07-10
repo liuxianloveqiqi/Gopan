@@ -55,5 +55,5 @@ service upload{
   rpc UploadFile(UploadFileReq)returns(CommonResp);  // 上传文件
   rpc FastUploadFile(FastUploadFileReq)returns(CommonResp); // 秒传
   rpc InitialMultipartUpload(InitialMultipartUploadReq) returns(InitialMultipartUploadResp); // 初始化分快上传
-  rpc UploadPart(UploadFileReq) returns(CommonResp); // 上传分块文件
+  rpc UploadPart(UploadPartReq) returns(CommonResp); // 上传分块文件
 }
