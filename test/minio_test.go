@@ -29,7 +29,7 @@ func TestMinio(t *testing.T) {
 	// 设置存储桶名称和文件名称
 	bucketName := "hehe"
 	objectName := "hello.txt"
-	filePath := "/Users/liuxian/GoProjects/project/Gopan/hello.txt"
+	filePath := "hello.txt"
 
 	// 创建存储桶（如果不存在）
 	err = minioClient.MakeBucket(context.TODO(), bucketName, minio.MakeBucketOptions{})

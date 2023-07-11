@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"Gopan/app/upload/rpc/types/upload"
 	"Gopan/common/errorx"
 	"context"
 	"github.com/pkg/errors"
@@ -32,7 +33,7 @@ func NewUploadPartReqLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upl
 func (l *UploadPartReqLogic) UploadPartReq(req *types.UploadPartReq, w http.ResponseWriter, r *http.Request) error {
 	// todo: add your logic here and delete this line
 	// 获得文件句柄，用于存储分块内容
-	filepath := "/data/" + req.UploadID + "/" + strconv.FormatInt(req.ChunkIndex, 10)
+	filepath := "/Users/liuxian/GoProjects/project/Gopan/data/file" + req.UploadID + "/" + strconv.FormatInt(req.ChunkIndex, 10)
 	err := os.MkdirAll(path.Dir(filepath), 0744)
 	if err != nil {
 		return errors.Wrapf(errorx.NewDefaultError(err.Error()), "make文件夹错误 err:%v", err)
@@ -56,6 +57,14 @@ func (l *UploadPartReqLogic) UploadPartReq(req *types.UploadPartReq, w http.Resp
 			break
 		}
 	}
+
 	// 调用rpc更新redis关于分块文件状态
+	_, err = l.svcCtx.Rpc.UploadPart(l.ctx, &upload.UploadPartReq{
+		UploadID:   req.UploadID,
+		ChunkIndex: req.ChunkIndex,
+	})
+	if err != nil {
+		return errors.Wrapf(err, "req: %+v", req)
+	}
 	return nil
 }

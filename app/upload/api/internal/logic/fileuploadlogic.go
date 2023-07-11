@@ -74,7 +74,7 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 	fileMeta := model.File{
 		FileName:   head.Filename,
 		FileSize:   head.Size,
-		FileAddr:   "/Users/liuxian/GoProjects/project/Gopan/tmp/" + head.Filename,
+		FileAddr:   "/Users/liuxian/GoProjects/project/Gopan/data/file/" + head.Filename,
 		Status:     0,
 		CreateTime: time.Now(),
 		UpdateTime: time.Now(),
