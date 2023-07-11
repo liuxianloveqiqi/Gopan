@@ -34,5 +34,5 @@ type CompleteUploadPartReq struct {
 	FileName         string `json:"fileName"`
 	FileSize         int64  `json:"fileSize"`
 	UploadID         string `json:"uploadId"`
-	ChunkSize        int64  `json:"chunkSize"`
+	ChunkCount       int64  `json:"chunkCount"`
 }

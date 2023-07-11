@@ -22,7 +22,8 @@ const (
 )
 
 const (
-	ErrFileOpen          = "打开文件错误"                //40001
-	ErrKafkaFileMeta     = "kafka异步fileMeta失败"     //40002
-	ErrKafkaUserFileMeta = "kafka异步userfileMate失败" //40003
+	ErrFileOpen                  = "打开文件错误"                //40001
+	ErrKafkaFileMeta             = "kafka异步fileMeta失败"     //40002
+	ErrKafkaUserFileMeta         = "kafka异步userfileMate失败" //40003
+	ErrMultipartUploadNoComplete = "分块上传的文件不完整"            // 40004
 )
