@@ -7,7 +7,7 @@ info(
 	version: "1.0.0"
 )
 type (
-	// 上传文件
+	// 上传文件（先存本地）
 	FileUploadReq {
 		// 上传文件的存储类型
 		CurrentStoreType int64 `form:"currentStoreType" validate:"required,in=1|2|3|4|5"`
@@ -35,12 +35,14 @@ type (
 		ChunkIndex int64  `json:"chunkIndex"`
 	}
 
-   // 合并分块的文件
-	CompleteUpload{
-		FileSha1   string `json:"fileSha1"`
-		FileSize   int64  `json:"fileSize"`
-		UploadID   string `json:"uploadId"`
-		ChunkSize  int64  `json:"chunkSize"`
+	// 合并分块的文件并且上传
+	CompleteUploadPartReq {
+		CurrentStoreType int64  `form:"currentStoreType" validate:"required,in=1|2|3|4|5"`
+		FileSha1         string `json:"fileSha1"`
+		FileName         string `json:"fileName"`
+		FileSize         int64  `json:"fileSize"`
+		UploadID         string `json:"uploadId"`
+		ChunkSize        int64  `json:"chunkSize"`
 	}
 )
 
@@ -70,6 +72,13 @@ service upload-api {
 	@doc(
 		summary: "上传分块文件"
 	)
-	@handler uploadPartReq
+	@handler uploadPart
 	post /multipartupload/uploadpart (UploadPartReq) returns ()
+	
+	@doc(
+		summary: "合并分块文件并上传到相应存储"
+	)
+	@handler CompleteUploadPart
+	post /multipartupload/completeuploadpart (CompleteUploadPartReq) returns ()
+	
 }

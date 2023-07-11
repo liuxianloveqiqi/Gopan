@@ -27,3 +27,12 @@ type UploadPartReq struct {
 	UploadID   string `json:"uploadId"`
 	ChunkIndex int64  `json:"chunkIndex"`
 }
+
+type CompleteUploadPartReq struct {
+	CurrentStoreType int64  `form:"currentStoreType" validate:"required,in=1|2|3|4|5"`
+	FileSha1         string `json:"fileSha1"`
+	FileName         string `json:"fileName"`
+	FileSize         int64  `json:"fileSize"`
+	UploadID         string `json:"uploadId"`
+	ChunkSize        int64  `json:"chunkSize"`
+}

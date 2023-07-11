@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func uploadPartReqHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func uploadPartHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.UploadPartReq
 		if err := httpx.Parse(r, &req); err != nil {
@@ -17,8 +17,8 @@ func uploadPartReqHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		l := logic.NewUploadPartReqLogic(r.Context(), svcCtx)
-		err := l.UploadPartReq(&req, w, r)
+		l := logic.NewUploadPartLogic(r.Context(), svcCtx)
+		err := l.UploadPart(&req, w, r)
 		response.Response(r, w, nil, err) //②
 
 	}

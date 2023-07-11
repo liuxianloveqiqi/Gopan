@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"github.com/tencentyun/cos-go-sdk-v5"
 	"io/ioutil"
-	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
 )
 
-func TecentCOSUpload(urlvalue, id, key, filePath string, file *multipart.FileHeader) error {
+func TecentCOSUpload(urlvalue, id, key, filePath string, file *os.File) error {
 	//COS客户端连接
 	u, _ := url.Parse(urlvalue)
 	b := &cos.BaseURL{BucketURL: u}
@@ -27,12 +26,8 @@ func TecentCOSUpload(urlvalue, id, key, filePath string, file *multipart.FileHea
 	})
 
 	// 3.通过文件流上传对象
-	fd, err := file.Open()
-	if err != nil {
-		return err
-	}
-	defer fd.Close()
-	_, saveErr := c.Object.Put(context.Background(), filePath, fd, nil)
+
+	_, saveErr := c.Object.Put(context.Background(), filePath, file, nil)
 	if saveErr == nil {
 		return nil
 	} else {

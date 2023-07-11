@@ -32,7 +32,12 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					Method:  http.MethodPost,
 					Path:    "/multipartupload/uploadpart",
-					Handler: uploadPartReqHandler(serverCtx),
+					Handler: uploadPartHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/multipartupload/completeuploadpart",
+					Handler: CompleteUploadPartHandler(serverCtx),
 				},
 			}...,
 		),

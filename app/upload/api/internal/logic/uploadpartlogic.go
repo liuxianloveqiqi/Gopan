@@ -16,21 +16,22 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type UploadPartReqLogic struct {
+type UploadPartLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewUploadPartReqLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UploadPartReqLogic {
-	return &UploadPartReqLogic{
+func NewUploadPartLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UploadPartLogic {
+	return &UploadPartLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *UploadPartReqLogic) UploadPartReq(req *types.UploadPartReq, w http.ResponseWriter, r *http.Request) error {
+func (l *UploadPartLogic) UploadPart(req *types.UploadPartReq, w http.ResponseWriter, r *http.Request) error {
+	// todo: add your logic here and delete this line
 	// todo: add your logic here and delete this line
 	// 获得文件句柄，用于存储分块内容
 	filepath := "/Users/liuxian/GoProjects/project/Gopan/data/file" + req.UploadID + "/" + strconv.FormatInt(req.ChunkIndex, 10)
@@ -67,4 +68,5 @@ func (l *UploadPartReqLogic) UploadPartReq(req *types.UploadPartReq, w http.Resp
 		return errors.Wrapf(err, "req: %+v", req)
 	}
 	return nil
+
 }
