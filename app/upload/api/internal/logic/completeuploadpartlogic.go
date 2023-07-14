@@ -11,6 +11,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -57,7 +58,12 @@ func (l *CompleteUploadPartLogic) CompleteUploadPart(req *types.CompleteUploadPa
 	}
 	// 开始合并分块
 	// 合并后的文件路径
-	mergedFilePath := "/data/" + req.FileSha1
+	mergedFilePath := "/Users/liuxian/GoProjects/project/Gopan/data/file/" + req.FileSha1 + "/" + req.FileName
+	err = os.MkdirAll(path.Dir(mergedFilePath), 0744)
+	if err != nil {
+		return errors.Wrapf(errorx.NewDefaultError(err.Error()), "make文件夹错误 err:%v", err)
+	}
+
 	mergedFile, err := os.Create(mergedFilePath)
 	if err != nil {
 		return errors.Wrapf(errorx.NewDefaultError(err.Error()), "os.Create合并后的文件路径  err:%v", err)
@@ -66,7 +72,7 @@ func (l *CompleteUploadPartLogic) CompleteUploadPart(req *types.CompleteUploadPa
 	defer mergedFile.Close()
 	// 读取每个分块文件数据并加入到合并文件中
 	for i := 1; i <= int(req.ChunkCount); i++ {
-		chunkFilePath := "/data/" + req.UploadID + "/" + strconv.Itoa(i) // 分块文件路径
+		chunkFilePath := "/Users/liuxian/GoProjects/project/Gopan/data/file/" + req.UploadID + "/" + strconv.Itoa(i) // 分块文件路径
 		chunkData, err := os.ReadFile(chunkFilePath)
 		if err != nil {
 			return errors.Wrapf(errorx.NewDefaultError(err.Error()), "os.ReadFile分块文件路径 err:%v", err)

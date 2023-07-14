@@ -48,3 +48,15 @@ docker run -it --privileged --pid=host justincormack/nsenter1
     }
 
 kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic gopan-upload --group gopan-upload-consume
+
+minikube kubectl -- create deployment gopan-user-rpc --image=liuxian123/gopan-user-rpc
+minikube kubectl -- expose deployment gopan-user-rpc  --type=NodePort --port=3002
+minikube kubectl -- delete deployment gopan-user-
+minikube kubectl -- delete deployment gopan-user-rpc
+
+minikube tunnel
+
+
+kubectl port-forward --address 0.0.0.0 -n istio-system app: gopan-user-rpc 3002:3002
+
+kubectl port-forward service/gopan-user-rpc 3002:3002

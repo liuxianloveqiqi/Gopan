@@ -32,13 +32,12 @@ func NewUploadPartLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upload
 
 func (l *UploadPartLogic) UploadPart(req *types.UploadPartReq, w http.ResponseWriter, r *http.Request) error {
 	// todo: add your logic here and delete this line
-	// todo: add your logic here and delete this line
+
 	// 获得文件句柄，用于存储分块内容
-	filepath := "/Users/liuxian/GoProjects/project/Gopan/data/file" + req.UploadID + "/" + strconv.FormatInt(req.ChunkIndex, 10)
+	filepath := "/Users/liuxian/GoProjects/project/Gopan/data/file/" + req.UploadID + "/" + strconv.FormatInt(req.ChunkIndex, 10)
 	err := os.MkdirAll(path.Dir(filepath), 0744)
 	if err != nil {
 		return errors.Wrapf(errorx.NewDefaultError(err.Error()), "make文件夹错误 err:%v", err)
-
 	}
 
 	fd, err := os.Create(filepath)
@@ -46,6 +45,7 @@ func (l *UploadPartLogic) UploadPart(req *types.UploadPartReq, w http.ResponseWr
 		return errors.Wrapf(errorx.NewDefaultError(err.Error()), "creat文件错误 err:%v", err)
 
 	}
+	defer fd.Close()
 	// 创建一个1MB大小的缓冲区
 	buf := make([]byte, 1*1024*1024)
 	for {
