@@ -2,18 +2,16 @@ package utils
 
 import (
 	"context"
-	"fmt"
 	"github.com/tencentyun/cos-go-sdk-v5"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"time"
 )
 
-func TecentCOSUpload(urlvalue, id, key, filePath string, file *os.File) error {
+func TencentCOSUpload(urlValue, id, key, filePath string, file *os.File) error {
 	//COS客户端连接
-	u, _ := url.Parse(urlvalue)
+	u, _ := url.Parse(urlValue)
 	b := &cos.BaseURL{BucketURL: u}
 	c := cos.NewClient(b, &http.Client{
 		//设置超时时间
@@ -35,27 +33,31 @@ func TecentCOSUpload(urlvalue, id, key, filePath string, file *os.File) error {
 	}
 
 }
-func TecentCOSDowmload(urlvalue, id, key, filename string) {
+func TencentCOSDownload(urlValue, id, key, bucketKey, downloadPath string) {
 	//将<bucket>和<region>修改为真实的信息
 	//bucket的命名规则为{name}-{appid} ，此处填写的存储桶名称必须为此格式
-	u, _ := url.Parse(urlvalue)
+	//COS客户端连接
+	u, _ := url.Parse(urlValue)
 	b := &cos.BaseURL{BucketURL: u}
 	c := cos.NewClient(b, &http.Client{
 		//设置超时时间
 		Timeout: 10000 * time.Second,
 		Transport: &cos.AuthorizationTransport{
 			//如实填写账号和密钥，也可以设置为环境变量
-			SecretID:  os.Getenv(id),
-			SecretKey: os.Getenv(key),
+			SecretID:  id,
+			SecretKey: key,
 		},
 	})
+	opt := &cos.MultiDownloadOptions{
+		ThreadPoolSize: 5,
+		CheckPoint:     true, // 开启断点续传
+	}
 
-	name := filename
-	resp, err := c.Object.Get(context.Background(), name, nil)
+	_, err := c.Object.Download(
+		context.Background(), bucketKey, downloadPath, opt,
+	)
 	if err != nil {
 		panic(err)
 	}
-	bs, _ := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
-	fmt.Printf("%s\n", string(bs))
+
 }
