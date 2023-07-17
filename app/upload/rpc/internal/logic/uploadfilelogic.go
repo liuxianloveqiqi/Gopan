@@ -31,10 +31,10 @@ type UploadFileLogic struct {
 }
 
 func (l *UploadFileLogic) COSUpload(filePath string, file *os.File) error {
-	Url := l.svcCtx.Config.TecentCOS.Url
-	SecretId := l.svcCtx.Config.TecentCOS.SecretId
-	SecretKey := l.svcCtx.Config.TecentCOS.SecretKey
-	err := utils.TecentCOSUpload(Url, SecretId, SecretKey, filePath, file)
+	Url := l.svcCtx.Config.TencentCOS.Url
+	SecretId := l.svcCtx.Config.TencentCOS.SecretId
+	SecretKey := l.svcCtx.Config.TencentCOS.SecretKey
+	err := utils.TencentCOSUpload(Url, SecretId, SecretKey, filePath, file)
 	if err != nil {
 		logc.Error(l.ctx, "上传文件失败")
 		return err

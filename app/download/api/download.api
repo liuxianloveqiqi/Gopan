@@ -1,0 +1,40 @@
+syntax = "v1"
+
+// 接口信息
+info(
+	title: "Gopan/download.api"
+	author: "liuxian"
+	version: "1.0.0"
+)
+type (
+	DownloadMinioReq {
+		FileSha1 string `json:"fileSha1"`
+		FileName string `json:"fileName"`
+		FileAddr string `json:"fileAddr"`
+	}
+	DownloadCOSReq {
+		FileSha1 string `json:"fileSha1"`
+		FileName string `json:"fileName"`
+
+		FileAddr string `json:"fileAddr"`
+	}
+)
+
+@server(
+	middleware: JWT // 路由中间件声明
+	prefix: file
+)
+
+service download-api {
+	@doc(
+		summary: "Minio下载文件"
+	)
+	@handler DownloadMinio
+	post /download/minio (DownloadMinioReq) returns ()
+	
+	@doc(
+		summary: "COS下载文件"
+	)
+	@handler DownloadCOS
+	post /download/cos (DownloadCOSReq) returns ()
+}

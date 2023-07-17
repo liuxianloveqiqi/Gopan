@@ -1,16 +1,12 @@
 package config
 
-import (
-	"github.com/zeromicro/go-zero/core/stores/cache"
-	"github.com/zeromicro/go-zero/zrpc"
-)
+import "github.com/zeromicro/go-zero/rest"
 
 type Config struct {
-	zrpc.RpcServerConf
+	rest.RestConf
 	MysqlCluster struct {
 		DataSource string
 	}
-	CacheRedis   cache.CacheConf
 	RedisCluster struct {
 		Cluster1 string
 		Cluster2 string
@@ -29,8 +25,5 @@ type Config struct {
 		SecretId  string
 		SecretKey string
 	}
-	KqPusherConf struct {
-		Brokers []string
-		Topic   string
-	}
+	FileLocalPath string
 }

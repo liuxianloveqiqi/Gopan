@@ -26,7 +26,7 @@ type Config struct {
 		AccessKey string
 		SecretKey string
 	}
-	TecentCOS struct {
+	TencentCOS struct {
 		Url       string
 		SecretId  string
 		SecretKey string

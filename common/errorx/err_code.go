@@ -26,4 +26,5 @@ const (
 	ErrKafkaFileMeta             = "kafka异步fileMeta失败"     //40002
 	ErrKafkaUserFileMeta         = "kafka异步userfileMate失败" //40003
 	ErrMultipartUploadNoComplete = "分块上传的文件不完整"            // 40004
+	ErrFileSha1Falsify           = "文件sha1值校验错误，文件已被篡改"    //40004
 )
