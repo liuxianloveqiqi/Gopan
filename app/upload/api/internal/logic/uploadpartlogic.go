@@ -34,7 +34,7 @@ func (l *UploadPartLogic) UploadPart(req *types.UploadPartReq, w http.ResponseWr
 	// todo: add your logic here and delete this line
 
 	// 获得文件句柄，用于存储分块内容
-	filepath := "/Users/liuxian/GoProjects/project/Gopan/data/file/" + req.UploadID + "/" + strconv.FormatInt(req.ChunkIndex, 10)
+	filepath := l.svcCtx.Config.FileLocalPath + req.UploadID + "/" + strconv.FormatInt(req.ChunkIndex, 10)
 	err := os.MkdirAll(path.Dir(filepath), 0744)
 	if err != nil {
 		return errors.Wrapf(errorx.NewDefaultError(err.Error()), "make文件夹错误 err:%v", err)

@@ -49,14 +49,15 @@ docker run -it --privileged --pid=host justincormack/nsenter1
 
 kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic gopan-upload --group gopan-upload-consume
 
-minikube kubectl -- create deployment gopan-user-rpc --image=liuxian123/gopan-user-rpc
-minikube kubectl -- expose deployment gopan-user-rpc  --type=NodePort --port=3002
-minikube kubectl -- delete deployment gopan-user-
+minikube kubectl -- create deployment chess-chat-api --image=liuxian123/chess-chat-api
+minikube kubectl -- expose deployment chess-chat-api  --type=NodePort --port=4003
+minikube kubectl -- delete deployment gopan-user-rpc
 minikube kubectl -- delete deployment gopan-user-rpc
 
 minikube tunnel
+# ip地址
+ifconfig en0
 
+kubectl port-forward --address 0.0.0.0 -n chess app: gopan-user-rpc 3002:3002
 
-kubectl port-forward --address 0.0.0.0 -n istio-system app: gopan-user-rpc 3002:3002
-
-kubectl port-forward service/gopan-user-rpc 3002:3002
+kubectl port-forward service/chess-chat-api 4003:4003

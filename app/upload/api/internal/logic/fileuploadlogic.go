@@ -57,7 +57,7 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 	fileSha1 := utils.FileSha1(file)
 	file.Seek(0, 0)
 
-	err = os.MkdirAll("/Users/liuxian/GoProjects/project/Gopan/data/file/"+fileSha1, 0755)
+	err = os.MkdirAll(l.svcCtx.Config.FileLocalPath+fileSha1, 0755)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func (l *FileUploadLogic) FileUpload(req *types.FileUploadReq, w http.ResponseWr
 		FileName: head.Filename,
 		FileSize: head.Size,
 		// 存储路径，sha1+name
-		FileAddr:   "/Users/liuxian/GoProjects/project/Gopan/data/file/" + fileSha1 + "/" + head.Filename,
+		FileAddr:   l.svcCtx.Config.FileLocalPath + fileSha1 + "/" + head.Filename,
 		Status:     0,
 		CreateTime: time.Now(),
 		UpdateTime: time.Now(),
