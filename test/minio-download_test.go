@@ -3,12 +3,10 @@ package test
 import (
 	"context"
 	"fmt"
-	"log"
-	"testing"
-	"time"
-
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"log"
+	"testing"
 )
 
 func TestPame(t *testing.T) {
@@ -29,13 +27,13 @@ func TestPame(t *testing.T) {
 
 	// 获取文件的下载链接
 	bucketName := "userfile"
-	objectName := "2023周二78-学习通慕课.xlsx"
-	expiry := time.Duration(24) * time.Hour // 链接过期时间
-
-	presignedURL, err := minioClient.PresignedGetObject(context.TODO(), bucketName, objectName, expiry, nil)
+	objectName := "docker-compose.yaml"
+	filePath := "/Users/liuxian/GoProjects/project/Gopan/data/file/download/docker"
+	// 使用MinIO客户端下载对象
+	err = minioClient.FGetObject(context.Background(), bucketName, objectName, filePath, minio.GetObjectOptions{})
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	fmt.Println("文件下载链接:", presignedURL)
+	fmt.Println("文件下载成功：", filePath)
 }

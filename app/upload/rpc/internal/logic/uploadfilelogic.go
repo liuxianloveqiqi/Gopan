@@ -23,6 +23,8 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+const bucketName = "userfile"
+
 type UploadFileLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
@@ -100,7 +102,7 @@ func (l *UploadFileLogic) UploadFile(in *upload.UploadFileReq) (*upload.CommonRe
 		// 文件写入Minio存储
 		log.Println("开始写入minio")
 		minioPath := "/minio/" + in.FileSha1 + "/" + in.FileName
-		bucketName := "userfile"
+		//bucketName := "userfile"
 		// 上传文件到 MinIO
 		_, err := l.svcCtx.MinioDb.PutObject(context.TODO(), bucketName, minioPath, file, -1, minio.PutObjectOptions{})
 		if err != nil {

@@ -23,6 +23,7 @@ type (
 @server(
 	middleware: JWT // 路由中间件声明
 	prefix: file
+	timeout: 999s
 )
 
 service download-api {

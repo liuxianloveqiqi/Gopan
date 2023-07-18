@@ -3,6 +3,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"Gopan/app/download/api/internal/svc"
 
@@ -26,6 +27,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
-		rest.WithPrefix("/file"),
+		rest.WithPrefix("/file"), rest.WithTimeout(999000*time.Millisecond),
 	)
 }
