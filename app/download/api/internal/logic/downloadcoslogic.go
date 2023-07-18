@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/core/logc"
 	"io"
 	"net/http"
 	"os"
@@ -62,6 +63,10 @@ func (l *DownloadCOSLogic) DownloadCOS(req *types.DownloadCOSReq, w http.Respons
 	if err != nil {
 		return errors.Wrapf(errorx.NewDefaultError("无法发送文件内容"), "无法发送文件内容,err:%v", err)
 	}
+	// 删除已发送的合并文件
+	if err := os.Remove(localFilePath); err != nil {
+		logc.Error(l.ctx, "无法删除合并文件:", err)
 
+	}
 	return nil
 }

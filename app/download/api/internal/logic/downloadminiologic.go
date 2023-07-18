@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/pkg/errors"
+	"github.com/zeromicro/go-zero/core/logc"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -40,7 +40,7 @@ func NewDownloadMinioLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Dow
 	}
 }
 
-func downloadFilePart(client *minio.Client, bucket, object string, partNumber int, wg *sync.WaitGroup, ch chan<- string) {
+func (l *DownloadMinioLogic) downloadFilePart(client *minio.Client, bucket, object string, partNumber int, wg *sync.WaitGroup, ch chan<- string) {
 	defer wg.Done()
 
 	// 创建文件以保存下载的分块
@@ -52,7 +52,7 @@ func downloadFilePart(client *minio.Client, bucket, object string, partNumber in
 	// 下载分块并将其写入文件
 	err := client.FGetObject(context.Background(), bucket, object, filePath, opts)
 	if err != nil {
-		log.Println("下载分块失败:", err)
+		logc.Errorf(l.ctx, "下载分块失败:", err)
 		ch <- "" // 将空字符串发送到通道表示下载失败
 		return
 	}
@@ -60,7 +60,7 @@ func downloadFilePart(client *minio.Client, bucket, object string, partNumber in
 	ch <- filePath // 将文件路径发送到通道表示下载成功
 }
 
-func mergeFileParts(outputDir, outputFileName string, totalParts int) error {
+func (l *DownloadMinioLogic) mergeFileParts(outputDir, outputFileName string, totalParts int) error {
 	// 创建输出文件以保存合并后的文件
 	outputPath := filepath.Join(outputDir, outputFileName)
 	outputFile, err := os.Create(outputPath)
@@ -83,14 +83,14 @@ func mergeFileParts(outputDir, outputFileName string, totalParts int) error {
 
 		// 删除已合并的分块文件
 		if err := os.Remove(partPath); err != nil {
-			log.Println("无法删除分块文件:", err)
+			logc.Errorf(l.ctx, "无法删除分块文件:", err)
 		}
 	}
 
 	return nil
 }
 
-func downloadAndMergeFile(client *minio.Client, bucket, object, outputDir, outputFileName string, totalParts int) error {
+func (l *DownloadMinioLogic) downloadAndMergeFile(client *minio.Client, bucket, object, outputDir, outputFileName string, totalParts int) error {
 	// 创建通道以接收成功下载的分块文件路径
 	ch := make(chan string, totalParts)
 
@@ -98,7 +98,7 @@ func downloadAndMergeFile(client *minio.Client, bucket, object, outputDir, outpu
 	var wg sync.WaitGroup
 	for partNumber := 0; partNumber < totalParts; partNumber++ {
 		wg.Add(1)
-		go downloadFilePart(client, bucket, object, partNumber, &wg, ch)
+		go l.downloadFilePart(client, bucket, object, partNumber, &wg, ch)
 	}
 
 	// 等待所有分块下载完成
@@ -113,7 +113,7 @@ func downloadAndMergeFile(client *minio.Client, bucket, object, outputDir, outpu
 	}
 
 	// 合并分块为完整文件
-	err := mergeFileParts(outputDir, outputFileName, totalParts)
+	err := l.mergeFileParts(outputDir, outputFileName, totalParts)
 	if err != nil {
 		return err
 	}
@@ -136,7 +136,7 @@ func (l *DownloadMinioLogic) DownloadMinio(req *types.DownloadMinioReq, w http.R
 	totalParts := int((info.Size + chunkSize - 1) / chunkSize)
 
 	// 下载并合并文件
-	err = downloadAndMergeFile(l.svcCtx.MinioDb, bucket, object, outputDir, outputFileName, totalParts)
+	err = l.downloadAndMergeFile(l.svcCtx.MinioDb, bucket, object, outputDir, outputFileName, totalParts)
 	if err != nil {
 		return errors.Wrapf(errorx.NewDefaultError("下载文件失败"), "下载文件失败 err:%v", err)
 
@@ -162,6 +162,10 @@ func (l *DownloadMinioLogic) DownloadMinio(req *types.DownloadMinioReq, w http.R
 	_, err = io.Copy(w, file)
 	if err != nil {
 		return errors.Wrapf(errorx.NewDefaultError("无法发送文件内容"), "无法发送文件内容 err:%v", err)
+	}
+	// 删除已发送的合并文件
+	if err := os.Remove(filePath); err != nil {
+		logc.Error(l.ctx, "无法删除合并文件:", err)
 	}
 	return nil
 }
