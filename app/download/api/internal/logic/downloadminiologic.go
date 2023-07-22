@@ -167,5 +167,6 @@ func (l *DownloadMinioLogic) DownloadMinio(req *types.DownloadMinioReq, w http.R
 	if err := os.Remove(filePath); err != nil {
 		logc.Error(l.ctx, "无法删除合并文件:", err)
 	}
+
 	return nil
 }

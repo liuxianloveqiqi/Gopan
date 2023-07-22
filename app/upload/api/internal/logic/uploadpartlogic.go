@@ -67,6 +67,6 @@ func (l *UploadPartLogic) UploadPart(req *types.UploadPartReq, w http.ResponseWr
 	if err != nil {
 		return errors.Wrapf(err, "req: %+v", req)
 	}
-	return nil
 
+	return nil
 }

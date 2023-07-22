@@ -1,0 +1,102 @@
+version: '3.7'
+
+# Create the network
+networks:
+  traefik-network:
+
+# Configure Traefik
+services:
+  traefik:
+    image: traefik:v2.4
+    command:
+      - "--providers.docker=true"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.minio-api.address=:7878"
+      - "--api=true"  # 启用Traefik的API
+      - "--api.insecure=true"# 启用Traefik的Web UI
+      - "--providers.docker"
+    ports:
+      - "8080:8080"  # Traefik dashboard
+      - "7878:7878"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - traefik-network
+
+  # Minio services
+  minio1:
+    image: minio/minio
+    command: server --console-address ":9001" http://minio{1...4}/data
+    ports:
+      - "9001:9001"
+
+    volumes:
+      - ./data/minio/data1:/data
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.rule=Host(`localhost`)"
+      - "traefik.http.routers.minio.entrypoints=minio-api" # 修改 entrypoint 为 api
+      - "traefik.http.services.minio.loadbalancer.server.port=9000" # 修改端口号为 MinIO 的 S3 API 端口号
+      - "traefik.http.services.minio.loadbalancer.server.scheme=http"
+      - "traefik.http.services.minio.loadbalancer.passhostheader=true"
+
+  minio2:
+    image: minio/minio
+    command: server --console-address ":9001" http://minio{1...4}/data
+
+    ports:
+      - "9002:9001"
+
+    volumes:
+      - ./data/minio/data2:/data
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.rule=Host(`localhost`)"
+      - "traefik.http.routers.minio.entrypoints=minio-api"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
+      - "traefik.http.services.minio.loadbalancer.server.scheme=http"
+      - "traefik.http.services.minio.loadbalancer.passhostheader=true"
+
+  minio3:
+    image: minio/minio
+    command: server --console-address ":9001" http://minio{1...4}/data
+    ports:
+      - "9003:9001"
+
+    volumes:
+      - ./data/minio/data3:/data
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.rule=Host(`localhost`)"
+      - "traefik.http.routers.minio.entrypoints=minio-api"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
+      - "traefik.http.services.minio.loadbalancer.server.scheme=http"
+      - "traefik.http.services.minio.loadbalancer.passhostheader=true"
+
+
+  minio4:
+    image: minio/minio
+    command: server --console-address ":9001" http://minio{1...4}/data
+    ports:
+      - "9004:9001"
+
+    volumes:
+      - ./data/minio/data4:/data
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.minio.rule=Host(`localhost`)"
+      - "traefik.http.routers.minio.entrypoints=minio-api"
+      - "traefik.http.services.minio.loadbalancer.server.port=9000"
+      - "traefik.http.services.minio.loadbalancer.server.scheme=http"
+      - "traefik.http.services.minio.loadbalancer.passhostheader=true"
+
+
+

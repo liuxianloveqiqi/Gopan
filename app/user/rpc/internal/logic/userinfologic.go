@@ -57,4 +57,5 @@ func (l *UserInfoLogic) UserInfo(in *user.UserInfoReq) (*user.UserList, error) {
 	return &user.UserList{
 		Users: users,
 	}, nil
+
 }
