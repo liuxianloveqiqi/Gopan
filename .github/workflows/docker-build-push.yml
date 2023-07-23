@@ -23,7 +23,6 @@ jobs:
     - name: Build and Push RMQ Docker image
       uses: docker/build-push-action@v3
       with:
-        context: .  # 设置Dockerfile的上下文路径为根目录
         dockerfile: ./app/transfer/rmq/Dockerfile
         push: true
         tags: liuxian123/gopan-rmq:latest  # 替换为你的Docker Hub用户名和仓库名
@@ -43,7 +42,6 @@ jobs:
     - name: Build and Push RPC Docker image
       uses: docker/build-push-action@v3
       with:
-        context: .  # 设置Dockerfile的上下文路径为根目录
         dockerfile: ./app/user/rpc/Dockerfile
         push: true
         tags: liuxian123/gopan-user-rpc/rpc:latest  # 替换为你的Docker Hub用户名和仓库名
@@ -63,7 +61,7 @@ jobs:
     - name: Build and Push API Docker image
       uses: docker/build-push-action@v3
       with:
-        context: .  # 设置Dockerfile的上下文路径为根目录
+
         dockerfile: ./app/user/api/Dockerfile
         push: true
         tags: liuxian123/gopan-user-api:latest  # 替换为你的Docker Hub用户名和仓库名
