@@ -15,6 +15,7 @@ func TestMinio(t *testing.T) {
 	endpoint := "43.139.195.17:7878"
 	accessKey := "minioadmin"
 	secretKey := "minioadmin"
+
 	useSSL := false
 
 	// 创建一个MinIO客户端对象
