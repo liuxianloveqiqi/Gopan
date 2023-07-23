@@ -26,6 +26,7 @@ func TestF(t *testing.T) {
 	}
 
 	fmt.Println("连接成功:", pong)
+
 	client.Set(context.TODO(), "aaaa", "eeeee", 0)
 	fmt.Println(client.Get(context.TODO(), "aaaa").Result())
 	// 关闭客户端连接
