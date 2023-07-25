@@ -26,7 +26,8 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
-	server := rest.MustNewServer(c.RestConf)
+	// 加上跨域
+	server := rest.MustNewServer(c.RestConf, rest.WithCors("https://main.hzroc.ant"))
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
