@@ -132,7 +132,7 @@ func (l *DownloadMinioLogic) DownloadMinio(req *types.DownloadMinioReq, w http.R
 
 	// 计算分块的数量
 	totalParts := int((info.Size + chunkSize - 1) / chunkSize)
-
+	fmt.Println(totalParts)
 	// 下载并合并文件
 	err = l.downloadAndMergeFile(l.svcCtx.MinioDb, bucket, object, outputDir, outputFileName, totalParts)
 	if err != nil {
