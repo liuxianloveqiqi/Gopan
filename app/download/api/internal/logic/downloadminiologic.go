@@ -2,7 +2,6 @@ package logic
 
 import (
 	"Gopan/common/errorx"
-	"Gopan/common/utils"
 	"context"
 	"fmt"
 	"github.com/minio/minio-go/v7"
@@ -56,7 +55,6 @@ func (l *DownloadMinioLogic) downloadFilePart(client *minio.Client, bucket, obje
 		ch <- "" // 将空字符串发送到通道表示下载失败
 		return
 	}
-	client.GetObject()
 	ch <- filePath // 将文件路径发送到通道表示下载成功
 }
 
@@ -151,9 +149,9 @@ func (l *DownloadMinioLogic) DownloadMinio(req *types.DownloadMinioReq, w http.R
 	}
 	defer file.Close()
 	// 校验文件sha1
-	if req.FileSha1 != utils.FileSha1(file) {
-		return errors.Wrapf(errorx.NewCodeError(40004, errorx.ErrFileSha1Falsify), "err:文件sha1值校验失败文件已经被篡改:file:%v", req)
-	}
+	//if req.FileSha1 != utils.FileSha1(file) {
+	//	return errors.Wrapf(errorx.NewCodeError(40004, errorx.ErrFileSha1Falsify), "err:文件sha1值校验失败文件已经被篡改:file:%v", req)
+	//}
 	// 设置响应头
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", outputFileName))
 	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
