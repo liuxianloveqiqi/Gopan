@@ -1,4 +1,4 @@
-# Gopan-基于go-zero的分布式网盘项目
+# Gopan-基于go-zero的微服务网盘项目
 
 ## 架构
 
