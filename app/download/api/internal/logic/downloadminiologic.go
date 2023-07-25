@@ -56,7 +56,7 @@ func (l *DownloadMinioLogic) downloadFilePart(client *minio.Client, bucket, obje
 		ch <- "" // 将空字符串发送到通道表示下载失败
 		return
 	}
-
+	client.GetObject()
 	ch <- filePath // 将文件路径发送到通道表示下载成功
 }
 
@@ -163,6 +163,7 @@ func (l *DownloadMinioLogic) DownloadMinio(req *types.DownloadMinioReq, w http.R
 	if err != nil {
 		return errors.Wrapf(errorx.NewDefaultError("无法发送文件内容"), "无法发送文件内容 err:%v", err)
 	}
+
 	// 删除已发送的合并文件
 	if err := os.Remove(filePath); err != nil {
 		logc.Error(l.ctx, "无法删除合并文件:", err)
