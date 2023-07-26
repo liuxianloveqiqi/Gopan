@@ -22,7 +22,7 @@ import (
 const (
 	bucket    = "userfile"
 	outputDir = "/Users/liuxian/GoProjects/project/Gopan/data/file/download/"
-	chunkSize = 50 * 1024 * 1024 // 每个分块的大小（50MB）
+	chunkSize = 128 * 1024 * 1024 // 每个分块的大小（50MB）
 )
 
 type DownloadMinioLogic struct {
@@ -46,12 +46,12 @@ func (l *DownloadMinioLogic) downloadFilePart(client *minio.Client, bucket, obje
 	filePath := outputDir + fmt.Sprintf("part%d", partNumber)
 
 	// 设置分块下载的选项
-	opts := minio.GetObjectOptions{}
+	opts := minio.GetObjectOptions{Checksum: true}
 	opts.PartNumber = partNumber
 	// 下载分块并将其写入文件
 	err := client.FGetObject(context.Background(), bucket, object, filePath, opts)
 	if err != nil {
-		logc.Errorf(l.ctx, "下载分块失败:", err)
+		logc.Errorf(l.ctx, "下载分块 %v 失败:", partNumber, err)
 		ch <- "" // 将空字符串发送到通道表示下载失败
 		return
 	}
@@ -69,7 +69,7 @@ func (l *DownloadMinioLogic) mergeFileParts(outputDir, outputFileName string, to
 	defer outputFile.Close()
 
 	// 将每个分块的内容合并到输出文件中
-	for i := 0; i < totalParts; i++ {
+	for i := 1; i <= totalParts; i++ {
 		partPath := outputDir + fmt.Sprintf("part%d", i)
 		partData, err := os.ReadFile(partPath)
 		if err != nil {
@@ -125,9 +125,11 @@ func (l *DownloadMinioLogic) DownloadMinio(req *types.DownloadMinioReq, w http.R
 	fmt.Println(req)
 	object := req.FileAddr
 	outputFileName := req.FileName
-
+	// 设置分块下载的选项
+	opts := minio.GetObjectOptions{Checksum: true}
+	opts.PartNumber = 2
 	// Fetch the object from MinIO
-	objectData, err := l.svcCtx.MinioDb.GetObject(l.ctx, bucket, object, minio.GetObjectOptions{})
+	objectData, err := l.svcCtx.MinioDb.GetObject(l.ctx, bucket, object, opts)
 	if err != nil {
 		return errors.Wrapf(errorx.NewDefaultError("无法获取对象信息"), "无法获取对象信息 err:%v", err)
 	}

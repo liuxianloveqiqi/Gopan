@@ -48,7 +48,7 @@ func (l *CompleteUploadPartLogic) CompleteUploadPart(req *types.CompleteUploadPa
 	// 遍历map
 	for k, v := range result {
 		// 检测k是否以"checkindex_"为前缀并且v为"1"
-		if strings.HasPrefix(k, "checkindex_") && strconv.Itoa(1) == v {
+		if strings.HasPrefix(k, "checkindex_") && "1" == v {
 			count++
 		}
 	}

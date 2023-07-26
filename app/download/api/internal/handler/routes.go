@@ -27,6 +27,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
-		rest.WithPrefix("/file"), rest.WithTimeout(999000*time.Millisecond),
+		rest.WithPrefix("/file"), rest.WithTimeout(9999000*time.Millisecond),
 	)
 }
