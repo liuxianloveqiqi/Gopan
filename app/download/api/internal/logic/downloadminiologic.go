@@ -22,7 +22,7 @@ import (
 const (
 	bucket    = "userfile"
 	outputDir = "/Users/liuxian/GoProjects/project/Gopan/data/file/download/"
-	chunkSize = 50 * 1024 * 1024 // 每个分块的大小（50MB）
+	chunkSize = 128 * 1024 * 1024 // 每个分块的大小（50MB）
 )
 
 type DownloadMinioLogic struct {
@@ -46,15 +46,16 @@ func (l *DownloadMinioLogic) downloadFilePart(client *minio.Client, bucket, obje
 	filePath := outputDir + fmt.Sprintf("part%d", partNumber)
 
 	// 设置分块下载的选项
-	opts := minio.GetObjectOptions{}
+	opts := minio.GetObjectOptions{Checksum: true}
 	opts.PartNumber = partNumber
 	// 下载分块并将其写入文件
 	err := client.FGetObject(context.Background(), bucket, object, filePath, opts)
 	if err != nil {
-		logc.Errorf(l.ctx, "下载分块失败:", err)
+		logc.Errorf(l.ctx, "下载分块 %v 失败:", partNumber, err)
 		ch <- "" // 将空字符串发送到通道表示下载失败
 		return
 	}
+
 	ch <- filePath // 将文件路径发送到通道表示下载成功
 }
 
@@ -68,7 +69,7 @@ func (l *DownloadMinioLogic) mergeFileParts(outputDir, outputFileName string, to
 	defer outputFile.Close()
 
 	// 将每个分块的内容合并到输出文件中
-	for i := 0; i < totalParts; i++ {
+	for i := 1; i <= totalParts; i++ {
 		partPath := outputDir + fmt.Sprintf("part%d", i)
 		partData, err := os.ReadFile(partPath)
 		if err != nil {
@@ -124,47 +125,39 @@ func (l *DownloadMinioLogic) DownloadMinio(req *types.DownloadMinioReq, w http.R
 	fmt.Println(req)
 	object := req.FileAddr
 	outputFileName := req.FileName
-	info, err := l.svcCtx.MinioDb.StatObject(l.ctx, bucket, object, minio.StatObjectOptions{})
+	// 设置分块下载的选项
+	opts := minio.GetObjectOptions{Checksum: true}
+	opts.PartNumber = 2
+	// Fetch the object from MinIO
+	objectData, err := l.svcCtx.MinioDb.GetObject(l.ctx, bucket, object, opts)
 	if err != nil {
 		return errors.Wrapf(errorx.NewDefaultError("无法获取对象信息"), "无法获取对象信息 err:%v", err)
-
 	}
+	defer objectData.Close()
 
-	// 计算分块的数量
-	totalParts := int((info.Size + chunkSize - 1) / chunkSize)
-	fmt.Println(totalParts)
-	// 下载并合并文件
-	err = l.downloadAndMergeFile(l.svcCtx.MinioDb, bucket, object, outputDir, outputFileName, totalParts)
-	if err != nil {
-		return errors.Wrapf(errorx.NewDefaultError("下载文件失败"), "下载文件失败 err:%v", err)
-
-	}
-
-	// 打开合并后的文件
-	filePath := filepath.Join(outputDir, outputFileName)
-	file, err := os.Open(filePath)
-	if err != nil {
-		return errors.Wrapf(errorx.NewDefaultError("无法打开文件"), "无法打开文件 err:%v", err)
-
-	}
-	defer file.Close()
-	// 校验文件sha1
-	//if req.FileSha1 != utils.FileSha1(file) {
-	//	return errors.Wrapf(errorx.NewCodeError(40004, errorx.ErrFileSha1Falsify), "err:文件sha1值校验失败文件已经被篡改:file:%v", req)
+	//// Create a file on the server to save the MinIO object data
+	//localFilePath := "/Users/liuxian/GoProjects/project/Gopan/data/file/download/" + outputFileName
+	//localFile, err := os.Create(localFilePath)
+	//if err != nil {
+	//	return errors.Wrapf(errorx.NewDefaultError("无法创建本地文件"), "无法创建本地文件 err:%v", err)
 	//}
-	// 设置响应头
+	//defer localFile.Close()
+	//
+	//// Copy the MinIO object data to the local file
+	//_, err = io.Copy(localFile, objectData)
+	//if err != nil {
+	//	return errors.Wrapf(errorx.NewDefaultError("无法写入本地文件"), "无法写入本地文件 err:%v", err)
+	//}
+
+	// Set the response headers for streaming download
+
+	// Calculate SHA1 hash of object content.sha1Hash = sha1.Sum(obiectContent)
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", outputFileName))
 	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
-
-	// 将文件内容发送给客户端
-	_, err = io.Copy(w, file)
+	// Stream the local file data directly to the client
+	_, err = io.Copy(w, objectData)
 	if err != nil {
 		return errors.Wrapf(errorx.NewDefaultError("无法发送文件内容"), "无法发送文件内容 err:%v", err)
-	}
-
-	// 删除已发送的合并文件
-	if err := os.Remove(filePath); err != nil {
-		logc.Error(l.ctx, "无法删除合并文件:", err)
 	}
 
 	return nil

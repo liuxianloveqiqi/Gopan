@@ -32,7 +32,11 @@ func NewUploadPartLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Upload
 
 func (l *UploadPartLogic) UploadPart(req *types.UploadPartReq, w http.ResponseWriter, r *http.Request) error {
 	// todo: add your logic here and delete this line
-
+	// 若分片已经上传，则直接返回
+	res := l.svcCtx.Rdb.HGet(l.ctx, "multipart_"+req.UploadID, "checkindex_"+strconv.FormatInt(req.ChunkIndex, 10))
+	if res.Err() != nil || res.Val() == "1" {
+		return errors.Wrapf(errorx.NewDefaultError("redis分块已经上传"), "redis分块已经上传,UploadID：%v, ChunkIndex:%v, err:%v", req.UploadID, req.ChunkIndex, res.Err())
+	}
 	// 获得文件句柄，用于存储分块内容
 	filepath := l.svcCtx.Config.FileLocalPath + req.UploadID + "/" + strconv.FormatInt(req.ChunkIndex, 10)
 	err := os.MkdirAll(path.Dir(filepath), 0744)
