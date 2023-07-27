@@ -1,10 +1,10 @@
 name: Docker Build and Push
 on:
-#  release:
-#   types: [published]  # 当发布一个新版本时触发，可选的事件类型还包括：created, edited, deleted, prereleased
-  push:
-    branches:
-      - main
+  release:
+   types: [published]  # 当发布一个新版本时触发，可选的事件类型还包括：created, edited, deleted, prereleased
+#   push:
+#     branches:
+#       - main
 
 jobs:
   build-and-push-gopan-rmq:
