@@ -62,3 +62,5 @@ ifconfig en0
 kubectl port-forward --address 0.0.0.0 -n chess app: gopan-user-rpc 3002:3002
 
 kubectl port-forward service/chess-chat-api 4003:4003
+
+/Applications/Docker.app/Contents/MacOS/Docker --uninstall

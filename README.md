@@ -58,15 +58,25 @@ Minikube是一种轻量化的Kubernetes集群，用于在本地开发环境中�
 
 受Dapper和OpenZipkin启发的Jaeger是由Uber Technologies作为开源发布的分布式跟踪系统。它用于监视和诊断基于微服务的分布式系统
 
+![image-20230727164835421](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/image-20230727164835421.png)
+
 #### 监控
 
-使用prometheus来作为监控工具，然后使用grafana来显示
+使用prometheus来作为监控工具
+
+![image-20230727232803368](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/image-20230727232803368.png)
+
+然后使用grafana来显示
+
+![image-20230727234804081](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/image-20230727234804081.png)
 
 ### 日志收集
 
 ![image-20230718164447023](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/image-20230718164447023.png)
 
 filebeat收集业务日志，然后将日志输出到kafka中，go-stash拉取kafka中日志根据配置过滤字段，然后将过滤后的字段输出到elasticsearch中，最后由kibana负责呈现日志
+
+![image-20230727165246393](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/image-20230727165246393.png)
 
 ## User服务
 
@@ -119,3 +129,7 @@ filebeat收集业务日志，然后将日志输出到kafka中，go-stash拉取ka
 ## transfer服务
 
 通过将消息随机发到多个 goroutine中来并发消费数据，再将消费的文件元信息写入mysql。
+
+## filemeta服务
+
+提供文件元数据相关操作

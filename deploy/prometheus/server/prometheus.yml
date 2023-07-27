@@ -16,74 +16,59 @@ scrape_configs:
           job: user-api
           app: user-api
           env: dev
-  - job_name: 'order-rpc'
+          instance: host.docker.internal:3001
+  - job_name: 'user-rpc'
     static_configs:
       - targets: [ 'gopan-user-rpc:6002' ]
         labels:
           job: user-rpc
           app: user-rpc
           env: dev
-#  - job_name: 'order-mq'
-#    static_configs:
-#      - targets: [ 'looklook:4003' ]
-#        labels:
-#          job: order-mq
-#          app: order-mq
-#          env: dev
-#  - job_name: 'payment-api'
-#    static_configs:
-#      - targets: [ 'looklook:4004' ]
-#        labels:
-#          job: payment-api
-#          app: payment-api
-#          env: dev
-#  - job_name: 'payment-rpc'
-#    static_configs:
-#      - targets: [ 'looklook:4005' ]
-#        labels:
-#          job: payment-rpc
-#          app: payment-rpc
-#          env: dev
-#  - job_name: 'travel-api'
-#    static_configs:
-#      - targets: [ 'looklook:4006' ]
-#        labels:
-#          job: travel-api
-#          app: travel-api
-#          env: dev
-#  - job_name: 'travel-rpc'
-#    static_configs:
-#      - targets: [ 'looklook:4007' ]
-#        labels:
-#          job: travel-rpc
-#          app: travel-rpc
-#          env: dev
-#  - job_name: 'usercenter-api'
-#    static_configs:
-#      - targets: ['looklook:4008']
-#        labels:
-#          job: usercenter-api
-#          app: usercenter-api
-#          env: dev
-#  - job_name: 'usercenter-rpc'
-#    static_configs:
-#      - targets: ['looklook:4009']
-#        labels:
-#          job: usercenter-rpc
-#          app: usercenter-rpc
-#          env: dev
-#  - job_name: 'mqueue-job'
-#    static_configs:
-#      - targets: [ 'looklook:4010' ]
-#        labels:
-#          job: mqueue-job
-#          app: mqueue-job
-#          env: dev
-#  - job_name: 'mqueue-scheduler'
-#    static_configs:
-#      - targets: [ 'looklook:4011' ]
-#        labels:
-#          job: mqueue-scheduler
-#          app: mqueue-scheduler
-#          env: dev
-
+          instance: host.docker.internal:3002
+  - job_name: 'upload-api'
+    static_configs:
+      - targets: [ 'gopan-upload-api:6003' ]
+        labels:
+          job: upload-api
+          app: upload-api
+          env: dev
+          instance: host.docker.internal:3003
+  - job_name: 'upload-rpc'
+    static_configs:
+      - targets: [ 'gopan-upload-rpc:6004' ]
+        labels:
+          job: upload-rpc
+          app: upload-rpc
+          env: dev
+          instance: host.docker.internal:3003
+  - job_name: 'transfer'
+    static_configs:
+      - targets: [ 'gopan-transfer:6010' ]
+        labels:
+          job: transfer
+          app: transfer
+          env: dev
+  - job_name: 'download-api'
+    static_configs:
+      - targets: [ 'gopan-download-api:6005' ]
+        labels:
+          job: download-api
+          app: download-api
+          env: dev
+          instance: host.docker.internal:3005
+  - job_name: 'filemeta-api'
+    static_configs:
+      - targets: [ 'gopan-filemeta-api:6006' ]
+        labels:
+          job: filemeta-api
+          app: filemeta-api
+          env: dev
+          instance: host.docker.internal:3006
+  - job_name: 'filemeta-rpc'
+    static_configs:
+      - targets: [ 'gopan-filemeta-rpc:6007' ]
+        labels:
+          job: filemeta-rpc
+          app: filemeta-rpc
+          env: dev
+          instance: host.docker.internal:3007

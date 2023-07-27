@@ -22,7 +22,9 @@ func main() {
 	flag.Parse()
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
-
+	if err := c.SetUp(); err != nil {
+		panic(err)
+	}
 	srv := service.NewService(c)
 	queue := kq.MustNewQueue(c.KqConsumerConf, kq.WithHandle(srv.Consume))
 	defer queue.Stop()

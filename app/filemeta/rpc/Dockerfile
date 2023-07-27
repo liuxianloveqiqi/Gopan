@@ -14,8 +14,8 @@ ADD go.mod .
 ADD go.sum .
 RUN go mod download
 COPY . .
-COPY app/user/api/etc /app/etc
-RUN go build -ldflags="-s -w" -o /app/user app/user/api/user.go
+COPY app/filemeta/rpc/etc /app/etc
+RUN go build -ldflags="-s -w" -o /app/filemeta app/filemeta/rpc/filemeta.go
 
 
 FROM scratch
@@ -25,7 +25,7 @@ COPY --from=builder /usr/share/zoneinfo/Asia/Shanghai /usr/share/zoneinfo/Asia/S
 ENV TZ Asia/Shanghai
 
 WORKDIR /app
-COPY --from=builder /app/user /app/user
+COPY --from=builder /app/filemeta /app/filemeta
 COPY --from=builder /app/etc /app/etc
 
-CMD ["./user", "-f", "etc/user-api.yaml"]
+CMD ["./filemeta", "-f", "etc/filemeta.yaml"]

@@ -44,11 +44,12 @@ type (
 	// 用户获取所有文件
 
 	GetUserFileMetaResp {
-		UserFileMetaList []UserFileMeta `json:"userFileMetaList"`
+		UserFileMetaList interface{} `json:"userFileMetaList"`
 	}
 	// 用户更新文件名
 	UpdataUserFileMetaReq {
 		FileName string `json:"fileName"`
+		FileSha1 string `json:"fileSha1"`
 	}
 )
 @server(

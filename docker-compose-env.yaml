@@ -37,7 +37,7 @@ services:
       - ./deploy/prometheus/server/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./data/prometheus/data:/prometheus
     command:
-      - '--config.file.sql=/etc/prometheus/prometheus.yml'
+      - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
     restart: always
     user: root
@@ -175,6 +175,7 @@ services:
     pid: host
 
   user-rpc: # 自定义容器名称
+    image: liuxian123/gopan-user-rpc:latest
     build:
       dockerfile: ./app/user/rpc/Dockerfile
     container_name: gopan-user-rpc
@@ -191,6 +192,7 @@ services:
     restart: always                      # 指定容器退出后的重启策略为始终重启
 
   user-api: # 自定义容器名称
+    image: liuxian123/gopan-user-api:latest
     build:
       dockerfile: ./app/user/api/Dockerfile
     container_name: gopan-user-api
@@ -206,14 +208,94 @@ services:
     restart: always                      # 指定容器退出后的重启策略为始终重启
 
   transfer: # 自定义容器名称
+    image: liuxian123/gopan-transfer:latest
     build:
-      dockerfile: .app/transfer/rmq/Dockerfile
+      dockerfile: ./app/transfer/rmq/Dockerfile
     container_name: gopan-transfer
     environment: # 设置环境变量
       - TZ=Asia/Shanghai
     privileged: true
+    stdin_open: true                     # 打开标准输入，可以接受外部输入
+    tty: true
+    networks:
+      - gopan
+    restart: always                      # 指定容器退出后的重启策略为始终重启
+
+  upload-api: # 自定义容器名称
+    image: liuxian123/gopan-upload-api:latest
+    build:
+      dockerfile: ./app/upload/api/Dockerfile
+    container_name: gopan-upload-api
+    environment: # 设置环境变量
+      - TZ=Asia/Shanghai
+    privileged: true
     ports: # 设置端口映射
-      - "3003:3003"  # user服务api端口
+      - "3003:3003"  # upload服务api端口
+    stdin_open: true                     # 打开标准输入，可以接受外部输入
+    tty: true
+    networks:
+      - gopan
+    restart: always                      # 指定容器退出后的重启策略为始终重启
+
+  upload-rpc: # 自定义容器名称
+    image: liuxian123/gopan-upload-rpc:latest
+    build:
+      dockerfile: ./app/upload/rpc/Dockerfile
+    container_name: gopan-upload-rpc
+    environment: # 设置环境变量
+      - TZ=Asia/Shanghai
+    privileged: true
+    ports: # 设置端口映射
+      - "3004:3004"  # upload服务rpc端口
+    stdin_open: true                     # 打开标准输入，可以接受外部输入
+    tty: true
+    networks:
+      - gopan
+    restart: always                      # 指定容器退出后的重启策略为始终重启
+
+  download-api: # 自定义容器名称
+    image: liuxian123/gopan-download-api:latest
+    build:
+      dockerfile: ./app/download/api/Dockerfile
+    container_name: gopan-download-api
+    environment: # 设置环境变量
+      - TZ=Asia/Shanghai
+    privileged: true
+    ports: # 设置端口映射
+      - "3005:3005"  # download服务api端口
+    stdin_open: true                     # 打开标准输入，可以接受外部输入
+    tty: true
+    networks:
+      - gopan
+    restart: always                      # 指定容器退出后的重启策略为始终重启
+
+  filemeta-api: # 自定义容器名称
+    image: liuxian123/gopan-filemeta-api:latest
+
+    build:
+      dockerfile: ./app/filemeta/api/Dockerfile
+    container_name: gopan-filemeta-api
+    environment: # 设置环境变量
+      - TZ=Asia/Shanghai
+    privileged: true
+    ports: # 设置端口映射
+      - "3006:3006"  # filemeta服务api端口
+    stdin_open: true                     # 打开标准输入，可以接受外部输入
+    tty: true
+    networks:
+      - gopan
+    restart: always                      # 指定容器退出后的重启策略为始终重启
+
+  filemeta-rpc: # 自定义容器名称
+    image: liuxian123/gopan-filemeta-rpc:latest
+    build:
+      dockerfile: ./app/filemeta/rpc/Dockerfile
+    container_name: gopan-filemeta-rpc
+    environment: # 设置环境变量
+      - TZ=Asia/Shanghai
+    privileged: true
+    ports: # 设置端口映射
+      - "3007:3007"  # filemeta服务api端口
     stdin_open: true                     # 打开标准输入，可以接受外部输入
     tty: true
     networks:

@@ -2,11 +2,13 @@ package config
 
 import (
 	"github.com/zeromicro/go-queue/kq"
+	"github.com/zeromicro/go-zero/core/service"
 )
 
 type Config struct {
 	KqConsumerConf kq.KqConf
-	MysqlCluster   struct {
+	service.ServiceConf
+	MysqlCluster struct {
 		DataSource string
 	}
 	RedisCluster struct {

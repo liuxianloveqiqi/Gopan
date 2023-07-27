@@ -35,9 +35,10 @@ type GetFileMetaResp struct {
 }
 
 type GetUserFileMetaResp struct {
-	UserFileMetaList []UserFileMeta `json:"userFileMetaList"`
+	UserFileMetaList interface{} `json:"userFileMetaList"`
 }
 
 type UpdataUserFileMetaReq struct {
 	FileName string `json:"fileName"`
+	FileSha1 string `json:"fileSha1"`
 }

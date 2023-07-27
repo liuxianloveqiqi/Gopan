@@ -37,6 +37,7 @@ message GetUserFileMetaResp{
 message UpdataUserFileMetaReq{
   int64 UserId=1;
    string FileName=2;
+   string FileSha1=3;
 }
 message CommonResp{
   int64 Code = 1;

@@ -18,9 +18,9 @@ const (
 )
 
 type Service struct {
-	c       config.Config // 配置信息
-	MysqlDb *gorm.DB      // MySQL 数据库连接对象
-
+	c        config.Config // 配置信息
+	MysqlDb  *gorm.DB      // MySQL 数据库连接对象
+	Log      logx.LogConf
 	waiter   sync.WaitGroup            // 用于等待所有消费者 goroutine 完成的等待组
 	msgsChan []chan *model.NewUserFile // 消息通道切片，每个元素是一个通道，用于存放消息
 }
