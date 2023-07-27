@@ -1,6 +1,6 @@
 goctl model mysql ddl -src file.sql -dir . -c
-goctl api go -api download.api -dir .
-goctl rpc protoc upload.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
+goctl api go -api filemeta.api -dir .
+goctl rpc protoc filemeta.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
 go run transfer.go -f etc/transfer.yaml
 go run download.go -f etc/download-api.yaml
 

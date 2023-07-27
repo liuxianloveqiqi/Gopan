@@ -37,7 +37,7 @@ type (
 
 	// 合并分块的文件并且上传
 	CompleteUploadPartReq {
-		CurrentStoreType int64  `form:"currentStoreType" validate:"required,in=1|2|3|4|5"`
+		CurrentStoreType int64  `json:"currentStoreType" validate:"required,in=1|2|3|4|5"`
 		FileSha1         string `json:"fileSha1"`
 		FileName         string `json:"fileName"`
 		FileSize         int64  `json:"fileSize"`

@@ -1,0 +1,88 @@
+syntax = "v1"
+
+// 接口信息
+info(
+	title: "Gopan/filemeta.api"
+	author: "liuxian"
+	version: "1.0.0"
+)
+type (
+	// 文件元信息
+	FileMeta {
+		Id         int64  `json:"id"`
+		FileSha1   string `json:"fileSha1"`
+		FileSize   int64  `json:"fileSize"`
+		FileName   string `json:"fileName"`
+		FileAddr   string `json:"fileAddr"`
+		Status     int64  `json:"status"`
+		CreateTime string `json:"createTime"`
+		UpdateTime string `json:"updateTime"`
+	}
+	// 用户文件元信息
+	UserFileMeta {
+		Id         int64  `json:"id"`
+		FileSha1   string `json:"fileSha1"`
+		FileSize   int64  `json:"fileSize"`
+		FileName   string `json:"fileName"`
+		Status     int64  `json:"status"`
+		CreateTime string `json:"createTime"`
+		UpdateTime string `json:"updateTime"`
+	}
+)
+type (
+	// 获取文件的sha1
+	GetFileSha1Resp {
+		FileSha1 string `json:"fileSha1"`
+	}
+	// 获取文件的元数数据
+	GetFileMetaReq {
+		FileSha1 string `json:"fileSha1"`
+	}
+	GetFileMetaResp {
+		FileMeta FileMeta `json:"fileMeta"`
+	}
+	// 用户获取所有文件
+
+	GetUserFileMetaResp {
+		UserFileMetaList []UserFileMeta `json:"userFileMetaList"`
+	}
+	// 用户更新文件名
+	UpdataUserFileMetaReq {
+		FileName string `json:"fileName"`
+	}
+)
+@server(
+	prefix: filemeta
+)
+service filemeta-api {
+	@doc(
+		summary: "获取文件sha1"
+	)
+	@handler GetFileSha1
+	post /getfilesha1 () returns (GetFileSha1Resp)
+	
+	@doc(
+		summary: "获取文件的元数据"
+	)
+	@handler GetFileMeta
+	post /getfilemeta (GetFileMetaReq) returns (GetFileMetaResp)
+	
+}
+
+@server(
+	middleware: JWT // 路由中间件声明
+	prefix: filemeta
+)
+service filemeta-api {
+	@doc(
+		summary: "获取用户文件信息"
+	)
+	@handler GetUserFileMeta
+	post /getUserfilemeta () returns (GetUserFileMetaResp)
+	
+	@doc(
+		summary: "用户更新文件名"
+	)
+	@handler  UpdataUserFileMeta
+	post /updatauserfilemeta (UpdataUserFileMetaReq) returns ()
+}

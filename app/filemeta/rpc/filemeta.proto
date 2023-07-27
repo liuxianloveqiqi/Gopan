@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package upload;
+
+option go_package = "./filemeta";
+// 文件元信息
+message FileMeta {
+  int64   Id = 1;
+  string  FileSha1 = 2;
+  int64 FileSize = 3;
+  string  FileName = 4  ;
+  string FileAddr = 6;
+  int64 Status = 7;
+  string CreateTime = 8;
+  string UpdateTime = 9;
+}
+
+message UserFileMeta {
+  int64 Id = 1;
+  string FileSha1 = 2;
+  int64 FileSize = 3;
+  string FileName = 4;
+  int64 Status = 5;
+  string CreateTime = 6;
+  string UpdateTime = 7;
+  int64 UserId=8;
+}
+message GetFileMetaReq{
+  string FileSha1=1;
+}
+message GetUserFileMetaReq{
+  int64 UserId=1;
+}
+message GetUserFileMetaResp{
+  repeated UserFileMeta UserFileMetaList=1;
+}
+message UpdataUserFileMetaReq{
+  int64 UserId=1;
+   string FileName=2;
+}
+message CommonResp{
+  int64 Code = 1;
+  string Message = 2;
+}
+service filemeta{
+  rpc GetFileMeta(GetFileMetaReq)returns(FileMeta);
+  rpc GetUserFileMeta(GetUserFileMetaReq)returns(GetUserFileMetaResp);
+  rpc UpdataUserFileMeta(UpdataUserFileMetaReq)returns(CommonResp);
+}
