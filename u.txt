@@ -1,8 +1,8 @@
 goctl model mysql ddl -src file.sql -dir . -c
 goctl api go -api filemeta.api -dir .
 goctl rpc protoc filemeta.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
-go run transfer.go -f etc/transfer.yaml
-go run download.go -f etc/download-api.yaml
+go run filemeta.go -f etc/filemeta.yaml
+go run filemeta.go -f etc/filemeta-api.yaml
 
 goctl model mysql datasource -url="root:123456@tcp(127.0.0.1:3306)/gopan" -table="*"  -dir="./service/app/user/model"
 
