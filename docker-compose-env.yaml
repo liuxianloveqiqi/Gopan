@@ -6,6 +6,23 @@ networks:
 
 # 服务容器配置
 services:
+  # Traefik网关
+  traefik:
+    image: traefik:v2.4
+    command:
+      - "--providers.docker=true"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.gopan.address=:3020"
+      - "--api=true"  # 启用Traefik的API
+      - "--api.insecure=true"# 启用Traefik的Web UI
+      - "--providers.docker"
+    ports:
+      - "8070:8080"  # Traefik dashboard
+      - "3020:3020"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - gopan
   #jaeger链路追踪 — Jaeger for tracing
   jaeger:
     image: jaegertracing/all-in-one:latest
@@ -206,6 +223,14 @@ services:
     networks:
       - gopan
     restart: always                      # 指定容器退出后的重启策略为始终重启
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gopan-user-api.rule=Host(`gopan`) && PathPrefix(`/account`)"
+      - "traefik.http.routers.gopan-user-api.entrypoints=gopan"
+      - "traefik.http.services.gopan-user-api.loadbalancer.server.port=3001"
+      - "traefik.docker.network=gopan"
+      - "traefik.http.services.gopan-user-api.loadbalancer.server.scheme=http"
+      - "traefik.http.services.gopan-user-api.loadbalancer.passhostheader=true"
 
   transfer: # 自定义容器名称
     image: liuxian123/gopan-transfer:latest
@@ -236,6 +261,14 @@ services:
     networks:
       - gopan
     restart: always                      # 指定容器退出后的重启策略为始终重启
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gopan-upload-api.rule=Host(`gopan`) && PathPrefix(`/file/upload`)"
+      - "traefik.http.routers.gopan-upload-api.entrypoints=gopan"
+      - "traefik.http.services.gopan-upload-api.loadbalancer.server.port=3003"
+      - "traefik.docker.network=gopan"
+      - "traefik.http.services.gopan-upload-api.loadbalancer.server.scheme=http"
+      - "traefik.http.services.gopan-upload-api.loadbalancer.passhostheader=true"
 
   upload-rpc: # 自定义容器名称
     image: liuxian123/gopan-upload-rpc:latest
@@ -268,23 +301,41 @@ services:
     networks:
       - gopan
     restart: always                      # 指定容器退出后的重启策略为始终重启
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gopan-download-api.rule=Host(`gopan`) && PathPrefix(`/file/download`)"
+      - "traefik.http.routers.gopan-download-api.entrypoints=gopan"
+      - "traefik.http.services.gopan-download-api.loadbalancer.server.port=3005"
+      - "traefik.docker.network=gopan"
+      - "traefik.http.services.gopan-download-api.loadbalancer.server.scheme=http"
+      - "traefik.http.services.gopan-download-api.loadbalancer.passhostheader=true"
 
   filemeta-api: # 自定义容器名称
     image: liuxian123/gopan-filemeta-api:latest
-
     build:
       dockerfile: ./app/filemeta/api/Dockerfile
-    container_name: gopan-filemeta-api
+    #container_name: gopan-filemeta-api
     environment: # 设置环境变量
       - TZ=Asia/Shanghai
     privileged: true
-    ports: # 设置端口映射
-      - "3006:3006"  # filemeta服务api端口
+#    ports: # 设置端口映射
+#      - "3006:3006"  # filemeta服务api端口
     stdin_open: true                     # 打开标准输入，可以接受外部输入
     tty: true
     networks:
       - gopan
     restart: always                      # 指定容器退出后的重启策略为始终重启
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gopan-filemeta-api.rule=Host(`gopan`) && PathPrefix(`/filemeta`)"
+      - "traefik.http.routers.gopan-filemeta-api.entrypoints=gopan"
+      - "traefik.http.services.gopan-filemeta-api.loadbalancer.server.port=3006"
+      - "traefik.docker.network=gopan"
+      - "traefik.http.services.gopan-filemeta-api.loadbalancer.server.scheme=http"
+      - "traefik.http.services.gopan-filemeta-api.loadbalancer.passhostheader=true"
+    deploy:
+      replicas: 3
+
 
   filemeta-rpc: # 自定义容器名称
     image: liuxian123/gopan-filemeta-rpc:latest
