@@ -212,12 +212,12 @@ services:
     image: liuxian123/gopan-user-api:latest
     build:
       dockerfile: ./app/user/api/Dockerfile
-    container_name: gopan-user-api
+#    container_name: gopan-user-api
     environment: # 设置环境变量
       - TZ=Asia/Shanghai
     privileged: true
-    ports: # 设置端口映射
-      - "3001:3001"  # user服务api端口
+#    ports: # 设置端口映射
+#      - "3001:3001"  # user服务api端口
     stdin_open: true                     # 打开标准输入，可以接受外部输入
     tty: true
     networks:
@@ -225,12 +225,14 @@ services:
     restart: always                      # 指定容器退出后的重启策略为始终重启
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.gopan-user-api.rule=Host(`gopan`) && PathPrefix(`/account`)"
+      - "traefik.http.routers.gopan-user-api.rule=Host(`gopan`) && PathPrefix(`/account`)" # 转发规则
       - "traefik.http.routers.gopan-user-api.entrypoints=gopan"
-      - "traefik.http.services.gopan-user-api.loadbalancer.server.port=3001"
+      - "traefik.http.services.gopan-user-api.loadbalancer.server.port=3001"    # 实例的端口
       - "traefik.docker.network=gopan"
       - "traefik.http.services.gopan-user-api.loadbalancer.server.scheme=http"
       - "traefik.http.services.gopan-user-api.loadbalancer.passhostheader=true"
+    deploy:
+      replicas: 3 # 启动三个实例
 
   transfer: # 自定义容器名称
     image: liuxian123/gopan-transfer:latest
@@ -250,12 +252,12 @@ services:
     image: liuxian123/gopan-upload-api:latest
     build:
       dockerfile: ./app/upload/api/Dockerfile
-    container_name: gopan-upload-api
+#    container_name: gopan-upload-api
     environment: # 设置环境变量
       - TZ=Asia/Shanghai
     privileged: true
-    ports: # 设置端口映射
-      - "3003:3003"  # upload服务api端口
+#    ports: # 设置端口映射
+#      - "3003:3003"  # upload服务api端口
     stdin_open: true                     # 打开标准输入，可以接受外部输入
     tty: true
     networks:
@@ -269,6 +271,8 @@ services:
       - "traefik.docker.network=gopan"
       - "traefik.http.services.gopan-upload-api.loadbalancer.server.scheme=http"
       - "traefik.http.services.gopan-upload-api.loadbalancer.passhostheader=true"
+    deploy:
+      replicas: 3 # 启动三个实例
 
   upload-rpc: # 自定义容器名称
     image: liuxian123/gopan-upload-rpc:latest
@@ -309,6 +313,8 @@ services:
       - "traefik.docker.network=gopan"
       - "traefik.http.services.gopan-download-api.loadbalancer.server.scheme=http"
       - "traefik.http.services.gopan-download-api.loadbalancer.passhostheader=true"
+    deploy:
+      replicas: 3 # 启动三个实例
 
   filemeta-api: # 自定义容器名称
     image: liuxian123/gopan-filemeta-api:latest
@@ -334,7 +340,7 @@ services:
       - "traefik.http.services.gopan-filemeta-api.loadbalancer.server.scheme=http"
       - "traefik.http.services.gopan-filemeta-api.loadbalancer.passhostheader=true"
     deploy:
-      replicas: 3
+      replicas: 3 # 启动三个实例
 
 
   filemeta-rpc: # 自定义容器名称
