@@ -8,6 +8,8 @@
 
 使用`go-zero`框架，将整个项目拆封为五个服务
 
+![go-zero](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/go-zero.png)
+
 ### 高可用
 
 #### MySQL innodb-cluster集群
@@ -42,16 +44,17 @@ MinIO集群采用去中心化无共享架构，各节点间为对等关系，连
 2. 对数据对象进行分片，默认策略是得到相同数量的数据分片和校验分片；
 3. 而后通过哈希算法计算出该数据对象对应的纠删组，并将数据和校验分片存储至纠删组内的硬盘上。
 
-#### k8s集群
-
-![img](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/4809dcf0af4543f581555cbd64f3e3a7.png)
-
-Minikube是一种轻量化的Kubernetes集群，用于在本地开发环境中快速搭建一个单节点的Kubernetes集群，是Kubernetes社区为了帮助开发者和学习者能够更好学习和体验k8s功能而推出的，借助个人PC的虚拟化环境就可以实现Kubernetes的快速构建启动。
-
 ### 高并发
 
 使用kafka+gorountie+batchers进行文件元信息的高并发处理
 
+### 网关
+
+使用Traefik对服务进行反向代理和负载均衡
+
+![图片](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/539903bacd400ef97e09e6be88d09a87.png)
+
+Traefik是一个为了让部署微服务更加便捷而诞生的现代HTTP反向代理、负载均衡工具。 它可以支持多种后端 (Docker, Swarm, Kubernetes, Marathon, Mesos, Consul, Etcd, Zookeeper, BoltDB, Rest API, file…) 来自动化、动态的应用它的配置文件设置
 ### 链路追踪
 
 ![image-20230718163504390](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/image-20230718163504390.png)
@@ -135,3 +138,7 @@ filebeat收集业务日志，然后将日志输出到kafka中，go-stash拉取ka
 ## filemeta服务
 
 提供文件元数据相关操作
+
+## 许可证
+
+**gopan** 在 **MIT** 许可证下开源,请在遵循 [MIT 开源证书](https://github.com/MashiroC/begonia/blob/master/LICENSE) 规则的前提下使用
