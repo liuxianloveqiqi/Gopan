@@ -139,6 +139,13 @@ filebeat收集业务日志，然后将日志输出到kafka中，go-stash拉取ka
 
 提供文件元数据相关操作
 
+## 代优化
+
+- [ ] 从docker-compose部署迁移到k8s集群部署
+- [ ] 使用GitHub Action/gitlab jenkins 进行 CI/CD
+- [ ] 分布式引入，mapreduce思想
+- [ ] ....
+
 ## 许可证
 
 **gopan** 在 **MIT** 许可证下开源,请在遵循 [MIT 开源证书](https://github.com/MashiroC/begonia/blob/master/LICENSE) 规则的前提下使用
