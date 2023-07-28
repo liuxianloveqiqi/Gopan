@@ -156,7 +156,7 @@ services:
   zookeeper:
     container_name: zookeeper
     build:
-      context: ./zookeeper
+      context: deploy/zookeeper
     environment:
       - TZ=Asia/Shanghai
     privileged: true
@@ -169,7 +169,7 @@ services:
   #消息队列 - Message queue
   kafka:
     build:
-      context: ./kafka
+      context: deploy/kafka
     container_name: kafka
     ports:
       - "9092:9092"
