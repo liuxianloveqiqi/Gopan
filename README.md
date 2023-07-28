@@ -4,6 +4,23 @@
 
 ![image-20230728025613573](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/image-20230728025613573.png)
 
+## 🚀技术栈
+
+| 功能               | 实现                                      |
+| :----------------- | ----------------------------------------- |
+| http框架           | gozero                                    |
+| rpc框架            | gozero                                    |
+| orm框架            | gorm                                      |
+| 数据库             | Innodb-cluster,redis-cluster              |
+| 对象存储           | 腾讯云cos，minio集群                      |
+| 服务发现与配置中心 | etcd                                      |
+| 链路追踪           | jaeger                                    |
+| 服务监控           | prometheus，grafana                       |
+| 消息队列           | kafka                                     |
+| 日志搜集           | filebeat，go-stash，elasticsearch，kibana |
+| 网关               | traefik                                   |
+| 部署               | Docker,docer-compose                      |
+
 ### 微服务化
 
 使用`go-zero`框架，将整个项目拆封为五个服务
@@ -139,11 +156,12 @@ filebeat收集业务日志，然后将日志输出到kafka中，go-stash拉取ka
 
 提供文件元数据相关操作
 
-## 代优化
+## 待优化
 
 - [ ] 从docker-compose部署迁移到k8s集群部署
 - [ ] 使用GitHub Action/gitlab jenkins 进行 CI/CD
 - [ ] 分布式引入，mapreduce思想
+- [ ] 用户文件的移动操作
 - [ ] ....
 
 ## 许可证
