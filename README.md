@@ -2,9 +2,11 @@
 
 ## 架构
 
+![image-20230728025613573](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/image-20230728025613573.png)
+
 ### 微服务化
 
-使用go-zero框架，将整个项目拆封为四个服务
+使用`go-zero`框架，将整个项目拆封为五个服务
 
 ### 高可用
 
@@ -12,9 +14,9 @@
 
 ![img](https://raw.githubusercontent.com/liuxianloveqiqi/Xian-imagehost/main/image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly93eHkwMzI3LmJsb2cuY3Nkbi5uZXQ=,size_16,color_FFFFFF,t_70.png)
 
-InnoDB 集群至少由三个 MySQL 服务器实例组成，并提供高可用性和可扩展性功能。将使用到以下 MySQL 技术：
+InnoDB 集群至少由三个` MySQL` 服务器实例组成，并提供高可用性和可扩展性功能。将使用到以下 MySQL 技术：
 
-- MySQL Shell，它是MySQL官方提供的高级客户端和代码编辑器。
+- MySQL Shell，它是`MySQL`官方提供的高级客户端和代码编辑器。
 - MySQL Server 和 Group Replication(组复制)，它们配合工作可以使一组MySQL实例对外提供高可能性。InnoDB Cluster提供了另一种易于使用的编程方式来使用Group Replication(组复制)功能。
 - MySQL Router，一个能在应用程序和InnoDB集群之间提供透明路由的轻量级中间件，是官方提供的MySQL实例负载均衡器(不再需要借助类似HAProxy的第三方负载均衡器了)。
 
@@ -26,7 +28,7 @@ Redis-Cluster采用无中心结构，其结构特点：
 
 1. 每个节点都和其它节点通过互ping保持连接，每个节点保存整个集群的状态信息，可以通过连接任意节点读取或者写入数据(甚至是没有数据的空节点)。 
 2. 节点的fail是通过集群中超过半数的节点检测失效时才生效。
-3.  Redis集群预分好16384个哈希槽，当需要在 Redis 集群中放置一个 key-value 时，根据公式HASH_SLOT=CRC16(key) mod 16384的值，决定将一个key放到哪个槽中。
+3.  Redis集群预分好16384个哈希槽，当需要在 `Redis` 集群中放置一个 key-value 时，根据公式HASH_SLOT=CRC16(key) mod 16384的值，决定将一个key放到哪个槽中。
 
 #### Minio集群
 
