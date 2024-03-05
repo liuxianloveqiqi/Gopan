@@ -1,9 +1,9 @@
-goctl model mysql ddl -src video.sql -dir . -c
-goctl api go -api video.api -dir . -style=go_zero
-goctl rpc protoc video.proto --go_out=./types --go-grpc_out=./types --zrpc_out=. -style=go_zero
+goctl model mysql ddl -src file.sql -dir . -c
+goctl api go -api filemeta.api -dir .
+goctl rpc protoc filemeta.proto --go_out=./types --go-grpc_out=./types --zrpc_out=.
 go run filemeta.go -f etc/filemeta.yaml
 go run filemeta.go -f etc/filemeta-api.yaml
-goctl model mysql ddl --src user.sql --dir . -c
+
 goctl model mysql datasource -url="root:123456@tcp(127.0.0.1:3306)/gopan" -table="*"  -dir="./service/app/user/model"
 
 redis-cli --cluster create 43.139.195.17:6379 43.139.195.17:6380 43.139.195.17:6381 43.139.195.17:6382 43.139.195.17:6383 43.139.195.17:6384 --cluster-replicas 1
@@ -64,5 +64,3 @@ kubectl port-forward --address 0.0.0.0 -n chess app: gopan-user-rpc 3002:3002
 kubectl port-forward service/chess-chat-api 4003:4003
 
 /Applications/Docker.app/Contents/MacOS/Docker --uninstall
-
-fffff
