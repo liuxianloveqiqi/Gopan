@@ -344,17 +344,16 @@ services:
 
 
   filemeta-rpc: # 自定义容器名称
-    image: liuxian123/gopan-filemeta-rpc:latest
-    build:
-      dockerfile: ./app/filemeta/rpc/Dockerfile
-    container_name: gopan-filemeta-rpc
+    image: ${DOCKER_USERNAME}/gopan-filemeta-rpc:latest
+
     environment: # 设置环境变量
       - TZ=Asia/Shanghai
     privileged: true
-    ports: # 设置端口映射
-      - "3007:3007"  # filemeta服务api端口
+
     stdin_open: true                     # 打开标准输入，可以接受外部输入
     tty: true
     networks:
       - gopan
     restart: always                      # 指定容器退出后的重启策略为始终重启
+    deploy:
+      replicas: 3 # 启动三个实例

@@ -61,13 +61,13 @@ service filemeta-api {
 	)
 	@handler GetFileSha1
 	post /getfilesha1 () returns (GetFileSha1Resp)
-	
+
 	@doc(
 		summary: "获取文件的元数据"
 	)
 	@handler GetFileMeta
 	post /getfilemeta (GetFileMetaReq) returns (GetFileMetaResp)
-	
+
 }
 
 @server(
@@ -80,7 +80,7 @@ service filemeta-api {
 	)
 	@handler GetUserFileMeta
 	post /getUserfilemeta () returns (GetUserFileMetaResp)
-	
+
 	@doc(
 		summary: "用户更新文件名"
 	)

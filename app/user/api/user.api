@@ -2,104 +2,103 @@ syntax = "v1"  // 版本号
 
 // 接口信息
 info(
-	title: "Gopan/user.api"
-	author: "liuxian"
-	version: "1.0.0"
+    title: "Gopan/user.api"
+    author: "liuxian"
+    version: "1.0.0"
 )
 type (
-	// 发验证码
-	RegisterByPhoneRep {
-		UserPhone string `json:"userPhone" validate:"required,phone"`
-	}
-	RegisterByPhoneResp {
-		VeCode string `json:"veCode"`
-	}
+    // 发验证码
+    SendVerificationCodeRep {
+        Phone string `json:"phone" validate:"required,phone"`
+    }
+    SendVerificationCodeResp{
+        VerificationCode string `json:"verification_code"`
+    }
 
-	// 手机号注册/登陆
-	RegisterReq {
-		UserPhone string `json:"userPhone" validate:"required,phone"`
-		VeCode    string `json:"veCode" validate:"required,len=6"`
-	}
-	TokenResp {
-		UserId       int64  `json:"userId"`
-		AccessToken  string `json:"accessToken"`
-		RefreshToken string `json:"refreshToken"`
-	}
-	// 手机号或者邮箱登陆
-	LoginReq {
-		PhoneOrEmail string `json:"phoneOrEmail" validate:"required"` // 手机号或者邮箱
-		PassWord     string `json:"PassWord"`                         // 用户密码，MD5加密
-	}
-	// 查询用户信息
-	userInfoReq {
-		UserId int64 `json:"userId"` // 用户id
-	}
+        // 手机号注册/登陆
+    RegisterOrLoginByPhoneReq {
+        Phone string `json:"phone" validate:"required,phone"`
+        VerificationCode string `json:"verification_code"`
+    }
+    RegisterOrLoginResp {
+        UserId int64 `json:"user_id"`
+        Token string `json:token"`
+    }
+        // 手机号,密码登录
+    RegisterOrLoginByPasswordReq {
+        Phone string `json:"phone" validate:"required"` // 手机号
+        PassWord string `json:"password"`               // 用户密码，MD5加密
+    }
+        // 查询用户信息
+    userInfoReq {
+        UserId int64 `json:"userId"` // 用户id
+    }
 
-	UserInfoResp {
-		UserInfo *UserInfoItem `json:"Data"`
-	}
+    UserInfoResp {
+        UserInfo *UserInfoItem `json:"Data"`
+    }
 
-	UserInfoItem {
-		Id         int64  `json:"userId"`     // 用户ID
-		PassWord   string `json:"passWord"`   // 用户密码，MD5加密
-		UserNick   string `json:"userNick"`   // 用户昵称
-		UserFace   string `json:"userFace"`   // 用户头像地址
-		UserSex    int64  `json:"userSex"`    // 用户性别：0男，1女，2保密
-		UserEmail  string `json:"userEmail"`  // 用户邮箱
-		UserPhone  string `json:"userPhone"`  // 手机号
-		CreateTime string `json:"createTime"` // 创建时间
-		UpdateTime string `json:"updateTime"` // 更新时间
-		DeleteTime string `json:"deleteTime"`
-	}
-	CommonResply {
-		Code    int64  `json:"Code"`
-		Message string `json:"Message"`
-		Data    string `json:"Data"`
-	}
+    UserInfoItem {
+        Id int64 `json:"userId"`              // 用户ID
+        PassWord string `json:"passWord"`     // 用户密码，MD5加密
+        UserNick string `json:"userNick"`     // 用户昵称
+        UserFace string `json:"userFace"`     // 用户头像地址
+        UserSex int64 `json:"userSex"`        // 用户性别：0男，1女，2保密
+        UserEmail string `json:"userEmail"`   // 用户邮箱
+        UserPhone string `json:"userPhone"`   // 手机号
+        CreateTime string `json:"createTime"` // 创建时间
+        UpdateTime string `json:"updateTime"` // 更新时间
+        DeleteTime string `json:"deleteTime"`
+    }
+    CommonResply {
+        Code int64 `json:"Code"`
+        Message string `json:"Message"`
+        Data string `json:"Data"`
+    }
 )
 
 @server(
-	prefix: account
+    prefix: account
 )
 service user-api {
-	@doc(
-		summary: "发验证码"
-	)
-	@handler Sendcode
-	post /sendcode (RegisterByPhoneRep) returns (RegisterByPhoneResp)
-	
-	@doc(
-		summary: "用户验证码形式注册/登陆"
-	)
-	@handler Register
-	post /register (RegisterReq) returns (TokenResp)
-	
-	@doc(
-		summary: "用户密码形式登录"
-	)
-	@handler Login
-	post /login (LoginReq) returns (TokenResp)
-	
-	@doc(
-		summary: "github第三方登陆"
-	)
-	@handler GithubLogin
-	get /github/login () returns ()
-	@doc(
-		summary: "github第三方回调"
-	)
-	@handler GithubCallback
-	get /github/callback () returns (TokenResp)
+    @doc(
+        summary: "发验证码"
+    )
+    @handler Sendcode
+    post /sendcode (RegisterByPhoneRep) returns (RegisterByPhoneResp)
+
+    @doc(
+        summary: "用户验证码形式注册/登陆"
+    )
+    @handler Register
+    post /register (RegisterReq) returns (TokenResp)
+
+    @doc(
+        summary: "用户密码形式登录"
+    )
+    @handler Login
+    post /login (LoginReq) returns (TokenResp)
+
+    @doc(
+        summary: "github第三方登陆"
+    )
+    @handler GithubLogin
+    get /github/login () returns ()
+    @doc(
+        summary: "github第三方回调"
+    )
+    @handler GithubCallback
+    get /github/callback () returns (TokenResp)
 }
 
 @server(
-	middleware: JWT // 路由中间件声明
-	prefix: account
+    middleware: JWT // 路由中间件声明
+    prefix: account
 )
 service user-api {
-	@doc(
-		summary: "用户信息"
-	)
-	@handler userInfo
-	post  /userinfo (userInfoReq) returns (UserInfoResp)
+    @doc(
+        summary: "用户信息"
+    )
+    @handler userInfo
+    post /userinfo (userInfoReq) returns (UserInfoResp)
 }
